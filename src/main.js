@@ -6,6 +6,8 @@ import './styles/global.scss' // 全局的样式文件
 
 import '@/mock/index.js'; // 使用mockjs模拟
 
+import _ from 'lodash' // 引入loadsh
+
 // 引入Element
 import Element from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'

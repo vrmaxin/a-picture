@@ -18,8 +18,12 @@ Mock.XHR.prototype.send = function () {
 //   timeout: '350-600'
 // })
 
-// 登录相关
-Mock.mock(/\/job\/basic\/list/, 'post', jobAPI.getList)
+// 工程设施
+Mock.mock(/\/job\/basic\/list/, 'post', jobAPI.getBasicList)
+Mock.mock(/\/job\/project\/list/, 'post', jobAPI.getProjectList)
+Mock.mock(/\/job\/monitor\/list/, 'post', jobAPI.getMonitorList)
+Mock.mock(/\/job\/video\/list/, 'post', jobAPI.getVideoList)
+Mock.mock(/\/job\/publicity\/list/, 'post', jobAPI.getPublicityList)
 
 // 文章相关
 Mock.mock(/\/monitor\/list/, 'get', monitorAPI.getList)
