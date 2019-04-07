@@ -6,11 +6,11 @@ class TMap {
   // 构造
   constructor(el, obj) {
     T = obj
-    this.zoom = 12
     this.lng = 114.40
     this.lat = 23.09
+    this.zoom = 12
     this.map = new T.Map(el);
-    this.map.centerAndZoom(new T.LngLat(114.40, 23.09), this.zoom);
+    this.map.centerAndZoom(new T.LngLat(this.lng, this.lat), this.zoom);
     // 用于存放当前弹窗对象的数组
     this.currentInfoWinArr = []
     map = this.map
@@ -21,37 +21,53 @@ class TMap {
 
   // 添加标注
   addMarker(point, data, iconUrl) {
-    debugger
     //创建图片对象
     map.centerAndZoom(point, 12);
-    var icon = new T.Icon({
-      iconUrl: "http://api.tianditu.gov.cn/img/map/markerA.png",
-      iconSize: new T.Point(19, 27),
-      iconAnchor: new T.Point(10, 25)
-    });
+
+    var marker
+    var options = {}
+    if (iconUrl) {
+      var icon = new T.Icon({
+        iconUrl: require(`@/assets/job/${iconUrl}.png`)
+        // iconSize: new T.Point(19, 27),
+        // iconAnchor: new T.Point(10, 25)
+      });
+      options = {
+        icon: icon
+      }
+    }
+
     //创建标注对象
-    var marker = new T.Marker(point, {
-      icon: icon
+    marker = new T.Marker(point, options);
+
+    // 添加标注点击事件
+    var that = this
+    marker.addEventListener("click", function (e) {
+      that.polyClickHandle(e, data)
     });
+
     //向地图上添加标注
     map.addOverLay(marker);
     return marker
   }
 
   // 添加线
-  addPolyline(points, data) {
+  addPolyline(points, data, options) {
     // 没有点时直接返回
     if (!points || !points.length) {
       return
     }
-    //创建线对象
-    var line = new T.Polyline(points, {
+    var defaultOptions = {
       color: "blue",
-      weight: 10,
+      weight: 2,
       opacity: 0.5,
       fillColor: "#FFFFFF",
       fillOpacity: 0.5
-    });
+    }
+
+    var distOptions = Object.assign(defaultOptions, options)
+    //创建线对象
+    var line = new T.Polyline(points, distOptions);
     // 添加线点击事件
     var that = this
     line.addEventListener("click", function (e) {
@@ -64,19 +80,23 @@ class TMap {
   }
 
   // 添加面
-  addPolygon(points, data) {
+  addPolygon(points, data, options) {
     // 没有点时直接返回
     if (!points || !points.length) {
       return
     }
-    //创建面对象
-    var polygon = new T.Polygon(points, {
+    var defaultOptions = {
       color: "blue",
-      weight: 3,
+      weight: 2,
       opacity: 0.5,
       fillColor: "#FFFFFF",
       fillOpacity: 0.5
-    });
+    }
+
+    var distOptions = Object.assign(defaultOptions, options)
+
+    //创建面对象
+    var polygon = new T.Polygon(points, distOptions);
     // 添加面点击事件
     var that = this
     polygon.addEventListener("click", function (e) {
@@ -117,7 +137,7 @@ class TMap {
   }
 
   removeOverLay(overLay) {
-    map.clearOverLays(overLay);
+    map.removeOverLay(overLay);
   }
 
   //创建坐标点集合

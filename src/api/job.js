@@ -8,23 +8,30 @@ export default {
       data
     })
   },
+  getBasicRiverList(data) {
+    return request({
+      url: '/job/basic/river/list',
+      method: 'post',
+      data
+    })
+  },
   getProjectList(data) {
     return request({
-      url: '/job/basic/list',
+      url: '/job/project/list',
       method: 'post',
       data
     })
   },
   getMonitorList(data) {
     return request({
-      url: '/job/basic/list',
+      url: '/job/monitor/list',
       method: 'post',
       data
     })
   },
   getVideoList(data) {
     return request({
-      url: '/job/basic/list',
+      url: '/job/video/list',
       method: 'post',
       data
     })

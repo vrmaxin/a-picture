@@ -20,6 +20,7 @@ Mock.XHR.prototype.send = function () {
 
 // 工程设施
 Mock.mock(/\/job\/basic\/list/, 'post', jobAPI.getBasicList)
+Mock.mock(/\/job\/basic\/river\/list/, 'post', jobAPI.getBasicRiverList)
 Mock.mock(/\/job\/project\/list/, 'post', jobAPI.getProjectList)
 Mock.mock(/\/job\/monitor\/list/, 'post', jobAPI.getMonitorList)
 Mock.mock(/\/job\/video\/list/, 'post', jobAPI.getVideoList)
