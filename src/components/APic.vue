@@ -46,10 +46,47 @@
       </div>
       <div>
         <div>水务监测站</div>
+        <el-checkbox :indeterminate="jobMonitorIsIndeterminate"
+                     v-model="jobMonitorAllSelected"
+                     @change="handleJobMonitorAllChange"
+                     size="mini"
+                     border>全选</el-checkbox>
         <el-checkbox-group v-model="jobMonitorSelected"
                            @change="handleJobMonitorChange"
                            size="mini">
           <el-checkbox v-for="(item,index) in jobMonitorOptions"
+                       :label="item.value"
+                       :key="index"
+                       border>{{item.label}}</el-checkbox>
+        </el-checkbox-group>
+      </div>
+      <div>
+        <div>视频监控</div>
+        <el-checkbox :indeterminate="jobVideoIsIndeterminate"
+                     v-model="jobVideoAllSelected"
+                     @change="handleJobVideoAllChange"
+                     size="mini"
+                     border>全选</el-checkbox>
+        <el-checkbox-group v-model="jobVideoSelected"
+                           @change="handleJobVideoChange"
+                           size="mini">
+          <el-checkbox v-for="(item,index) in jobVideoOptions"
+                       :label="item.value"
+                       :key="index"
+                       border>{{item.label}}</el-checkbox>
+        </el-checkbox-group>
+      </div>
+      <div>
+        <div>公示牌</div>
+        <el-checkbox :indeterminate="jobPublicIsIndeterminate"
+                     v-model="jobPublicAllSelected"
+                     @change="handleJobPublicAllChange"
+                     size="mini"
+                     border>全选</el-checkbox>
+        <el-checkbox-group v-model="jobPublicSelected"
+                           @change="handleJobPublicChange"
+                           size="mini">
+          <el-checkbox v-for="(item,index) in jobPublicOptions"
                        :label="item.value"
                        :key="index"
                        border>{{item.label}}</el-checkbox>
@@ -75,16 +112,22 @@ export default {
       jobBasicList: [],
       jobProjectList: [],
       jobMonitorList: [],
+      jobVideoList: [],
+      jobPublicList: [],
 
       // 不定项时，全选按钮状态
       jobBasicIsIndeterminate: false,
       jobProjectIsIndeterminate: false,
+      jobMonitorIsIndeterminate: false,
+      jobVideoIsIndeterminate: false,
+      jobPublicIsIndeterminate: false,
 
       // 全选按钮状态
       jobBasicAllSelected: false,
       jobProjectAllSelected: false,
       jobMonitorAllSelected: false,
       jobVideoAllSelected: false,
+      jobPublicAllSelected: false,
 
       // 左侧选择项
       jobBasicSelected: [],
@@ -92,7 +135,7 @@ export default {
       jobProjectSelected: [],
       jobMonitorSelected: [],
       jobVideoSelected: [],
-      jobPublicitySelected: [],
+      jobPublicSelected: [],
 
       // 水利基础备选项
       jobBasicOptions: [{
@@ -150,9 +193,6 @@ export default {
       // 水务监测站
       jobMonitorOptions: [
         {
-          value: '0',
-          label: '全部'
-        }, {
           value: '1',
           label: '水库站'
         }, {
@@ -176,6 +216,28 @@ export default {
         }
       ],
 
+      // 视频监控
+      jobVideoOptions: [
+        {
+          value: '1',
+          label: '水文局'
+        }, {
+          value: '2',
+          label: '环保局'
+        }, {
+          value: '3',
+          label: '东江流域局'
+        }
+      ],
+
+      // 视频监控
+      jobPublicOptions: [
+        {
+          value: '1',
+          label: '公示牌'
+        }
+      ],
+
       // 接口参数
       jobBasicParam: {
         types: []
@@ -189,13 +251,38 @@ export default {
       jobMonitorParam: {
         types: []
       },
+      jobVideoParam: {
+        types: []
+      },
+      jobPublicParam: {
+        types: []
+      },
 
       // 水利工程图标映射
-      jobProjectIconMap: {
-        '1': 'reservoir',
-        '2': 'dam',
-        '3': 'sluice',
-        '4': 'pump'
+      jobIconMap: {
+        project: {
+          '1': 'reservoir',
+          '2': 'dam',
+          '3': 'sluice',
+          '4': 'pump'
+        },
+        monitor: {
+          '1': 'reservoir',
+          '2': 'rain',
+          '3': 'quality',
+          '4': 'section',
+          '5': 'power',
+          '6': 'camera',
+          '7': 'bulletin'
+        },
+        video: {
+          '1': 'hydrology',
+          '2': 'protection',
+          '3': 'djbasin'
+        },
+        public: {
+          '1': 'public'
+        }
       },
       // 水利基础配置项映射
       jobBasicOptionMap: {
@@ -269,7 +356,7 @@ export default {
 
         // 设置模块名称，用于区分窗口属性映射关系keyMap的设置
         that.tMap.moduleType = 'basic'
-        
+
         for (var i = 0; i < that.basicList.length; i++) {
           var item = that.basicList[i]
           var type = item.type
@@ -357,6 +444,9 @@ export default {
       }
       job['getProjectList'](that.jobProjectParam).then(response => {
         that.jobProjectList = response.data;
+
+        // 设置模块名称，用于区分窗口属性映射关系keyMap的设置
+        that.tMap.moduleType = 'project'
         for (var i = 0; i < that.jobProjectList.length; i++) {
           var item = that.jobProjectList[i]
           var lnglat = item.lnglat
@@ -366,9 +456,6 @@ export default {
 
           // 添加覆盖物并返回覆盖物
           var overlay = that.tMap.addMarker(point, item, iconUrl)
-
-          // var zoom = 13
-          // that.tMap.setZoom(zoom)
 
           // 将水利基础覆盖物保存起来
           if (!that.tMap.jobProjectOverLays) {
@@ -382,18 +469,112 @@ export default {
     // 获取水务监测站数据
     getMonitorList () {
       var that = this
+
+      // 1.先清除现有的水务监测站的覆盖物
+      if (that.tMap.jobMonitorOverLays && that.tMap.jobMonitorOverLays.length) {
+        var overLays = that.tMap.jobMonitorOverLays
+        for (var i = 0; i < overLays.length; i++) {
+          var overlay = overLays[i]
+          that.tMap.removeOverLay(overlay)
+        }
+        delete that.tMap.jobMonitorOverLays
+      }
       job['getMonitorList'](that.jobMonitorParam).then(response => {
         that.jobMonitorList = response.data;
+
+        // 设置模块名称，用于区分窗口属性映射关系keyMap的设置
+        that.tMap.moduleType = 'monitor'
         for (var i = 0; i < that.jobMonitorList.length; i++) {
           var item = that.jobMonitorList[i]
-          var lnglatList = item.lnglatList
-          var points = that.tMap.buildPoints(lnglatList)
+          var lnglat = item.lnglat
+          // 构建坐标点列表
+          var point = that.tMap.buildPoint(lnglat)
+          var iconUrl = that.getIconBytype(that.tMap.moduleType, item.type)
 
-          if (this.jobBasicSelected.indexOf('basin') !== -1 || this.jobBasicSelected.indexOf('basin') !== -1) {
-            that.tMap.addPolygon(points, item)
-          } else if (this.selectedBasic === 'river' || this.selectedBasic === 'redline') {
-            that.tMap.addPolyline(points, item)
+          // 添加覆盖物并返回覆盖物
+          var overlay = that.tMap.addMarker(point, item, iconUrl)
+
+          // 将水利基础覆盖物保存起来
+          if (!that.tMap.jobMonitorOverLays) {
+            that.tMap.jobMonitorOverLays = []
           }
+          that.tMap.jobMonitorOverLays.push(overlay)
+        }
+        console.log(response.data);
+      })
+    },
+
+    // 获取水务监测站数据
+    getVideoList () {
+      var that = this
+
+      // 1.先清除现有的水务监测站的覆盖物
+      if (that.tMap.jobVideoOverLays && that.tMap.jobVideoOverLays.length) {
+        var overLays = that.tMap.jobVideoOverLays
+        for (var i = 0; i < overLays.length; i++) {
+          var overlay = overLays[i]
+          that.tMap.removeOverLay(overlay)
+        }
+        delete that.tMap.jobVideoOverLays
+      }
+      job['getVideoList'](that.jobVideoParam).then(response => {
+        that.jobVideoList = response.data;
+
+        // 设置模块名称，用于区分窗口属性映射关系keyMap的设置
+        that.tMap.moduleType = 'video'
+        for (var i = 0; i < that.jobVideoList.length; i++) {
+          var item = that.jobVideoList[i]
+          var lnglat = item.lnglat
+          // 构建坐标点列表
+          var point = that.tMap.buildPoint(lnglat)
+          var iconUrl = that.getIconBytype(that.tMap.moduleType, item.type)
+
+          // 添加覆盖物并返回覆盖物
+          var overlay = that.tMap.addMarker(point, item, iconUrl)
+
+          // 将水利基础覆盖物保存起来
+          if (!that.tMap.jobVideoOverLays) {
+            that.tMap.jobVideoOverLays = []
+          }
+          that.tMap.jobVideoOverLays.push(overlay)
+        }
+        console.log(response.data);
+      })
+    },
+
+    // 获取水务监测站数据
+    getPublicList () {
+      var that = this
+
+      // 1.先清除现有的水务监测站的覆盖物
+      if (that.tMap.jobPublicOverLays && that.tMap.jobPublicOverLays.length) {
+        var overLays = that.tMap.jobPublicOverLays
+        for (var i = 0; i < overLays.length; i++) {
+          var overlay = overLays[i]
+          that.tMap.removeOverLay(overlay)
+        }
+        delete that.tMap.jobPublicOverLays
+      }
+      job['getPublicList'](that.jobPublicParam).then(response => {
+        that.jobPublicList = response.data;
+
+        // 设置模块名称，用于区分窗口属性映射关系keyMap的设置
+        that.tMap.moduleType = 'public'
+        for (var i = 0; i < that.jobPublicList.length; i++) {
+          var item = that.jobPublicList[i]
+          var lnglat = item.lnglat
+          // 构建坐标点列表
+          var point = that.tMap.buildPoint(lnglat)
+          var iconUrl = that.getIconBytype(that.tMap.moduleType, item.type)
+
+          // 添加覆盖物并返回覆盖物
+          var overlay = that.tMap.addMarker(point, item, iconUrl)
+
+          // 将水利基础覆盖物保存起来
+          if (!that.tMap.jobPublicOverLays) {
+            that.tMap.jobPublicOverLays = []
+          }
+          that.tMap.jobPublicOverLays.push(overlay)
         }
         console.log(response.data);
       })
@@ -451,14 +632,75 @@ export default {
       this.getProjectList()
     },
 
+    // 水务监测站全选按钮事件
+    handleJobMonitorAllChange (val) {
+      this.jobMonitorSelected = [].concat()
+      if (val) {
+        for (var i in this.jobMonitorOptions) {
+          var item = this.jobMonitorOptions[i]
+          this.jobMonitorSelected.push(item.value)
+        }
+      }
+      this.jobMonitorIsIndeterminate = false
+      this.jobMonitorParam.types = this.jobMonitorSelected
+      this.getMonitorList()
+    },
+
     handleJobMonitorChange (val) {
+      let checkedCount = val.length;
+      this.jobMonitorAllSelected = checkedCount === this.jobMonitorOptions.length;
+      this.jobMonitorIsIndeterminate = checkedCount > 0 && checkedCount < this.jobMonitorOptions.length;
       this.jobMonitorParam.types = val
       this.getMonitorList()
     },
 
-    // 根据类别获取水利工程图标
-    getIconBytype (type) {
-      return this.jobProjectIconMap[type]
+    // 水利工程全选按钮事件
+    handleJobVideoAllChange (val) {
+      this.jobVideoSelected = [].concat()
+      if (val) {
+        for (var i in this.jobVideoOptions) {
+          var item = this.jobVideoOptions[i]
+          this.jobVideoSelected.push(item.value)
+        }
+      }
+      this.jobVideoIsIndeterminate = false
+      this.jobVideoParam.types = this.jobVideoSelected
+      this.getVideoList()
+    },
+
+    handleJobVideoChange (val) {
+      let checkedCount = val.length;
+      this.jobVideoAllSelected = checkedCount === this.jobVideoOptions.length;
+      this.jobVideoIsIndeterminate = checkedCount > 0 && checkedCount < this.jobVideoOptions.length;
+      this.jobVideoParam.types = val
+      this.getVideoList()
+    },
+
+    // 水利工程全选按钮事件
+    handleJobPublicAllChange (val) {
+      this.jobPublicSelected = [].concat()
+      if (val) {
+        for (var i in this.jobPublicOptions) {
+          var item = this.jobPublicOptions[i]
+          this.jobPublicSelected.push(item.value)
+        }
+      }
+      this.jobPublicIsIndeterminate = false
+      this.jobPublicParam.types = this.jobPublicSelected
+      this.getPublicList()
+    },
+
+    handleJobPublicChange (val) {
+      let checkedCount = val.length;
+      this.jobPublicAllSelected = checkedCount === this.jobPublicOptions.length;
+      this.jobPublicIsIndeterminate = checkedCount > 0 && checkedCount < this.jobPublicOptions.length;
+      this.jobPublicParam.types = val
+      this.getPublicList()
+    },
+
+    // 根据类别获取图标
+    getIconBytype (moduleType, type) {
+      return this.jobIconMap[moduleType][type]
     },
 
     // 根据水利基础类别获取覆盖物样式

@@ -38,7 +38,7 @@ class TMap {
     var options = {}
     if (iconUrl) {
       var icon = new T.Icon({
-        iconUrl: require(`@/assets/job/${iconUrl}.png`)
+        iconUrl: require(`@/assets/job/${this.moduleType}/${iconUrl}.png`)
       });
       options = {
         icon: icon
@@ -116,18 +116,23 @@ class TMap {
     for (var key in data) {
       var val = data[key]
       var keyMap = getkeyMapByModuleType(this.moduleType)
-      if (keyMap[key]) {
+      if (keyMap && keyMap[key]) {
         if (typeof val == "object" && Object.prototype.toString.call(val).toLowerCase() == "[object object]" && !val.length) {
           var subKeyMap = keyMap[key]
           var subData = val
           for (var subKey in subData) {
             var subVal = subData[subKey]
-            if (subKeyMap[subKey]) {
+            if (subKeyMap && subKeyMap[subKey]) {
               html += `<div><strong>${subKeyMap[subKey]}:</strong><span>${subVal}</span></div>`
             }
           }
         } else {
-          html += `<div><strong>${keyMap[key]}:</strong><span>${val}</span></div>`
+          if (key === 'videoUrl') {
+            var path = require(`@/static/${val}`)
+            html += `<div><video style="width:300px;height:150px;" controls="controls" autoplay src=${path}></video></div>`
+          } else {
+            html += `<div><strong>${keyMap[key]}:</strong><span>${val}</span></div>`
+          }
         }
       }
 

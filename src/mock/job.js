@@ -748,6 +748,98 @@ var projectData = [{
   lnglat: '114.357030,23.081940'
 }]
 
+var monitorData = [{
+  id: '1',
+  name: '水库站A',
+  type: '1',
+  lnglat: '114.373340,23.107210'
+}, {
+  id: '2',
+  name: '水库站B',
+  type: '1',
+  lnglat: '114.391970,23.108080'
+}, {
+  id: '3',
+  name: '雨量站A',
+  type: '2',
+  lnglat: '114.419350,23.093710'
+}, {
+  id: '4',
+  name: '雨量站B',
+  type: '2',
+  lnglat: '114.421230,23.084310'
+}, {
+  id: '5',
+  name: '水质站A',
+  type: '3',
+  lnglat: '114.360290,23.103650'
+}, {
+  id: '6',
+  name: '水质站B',
+  type: '3',
+  lnglat: '114.340640,23.080840'
+}, {
+  id: '7',
+  name: '河道断面站A',
+  type: '4',
+  lnglat: '114.342960,23.061890'
+}, {
+  id: '8',
+  name: '河道断面站B',
+  type: '4',
+  lnglat: '114.402610,23.058810'
+}, {
+  id: '9',
+  name: '梯级电站A',
+  type: '5',
+  lnglat: '114.444320,23.088420'
+}, {
+  id: '10',
+  name: '梯级电站B',
+  type: '5',
+  lnglat: '114.419780,23.104840'
+}, {
+  id: '11',
+  name: '摄像头A',
+  type: '6',
+  lnglat: '114.389480,23.108870'
+}, {
+  id: '12',
+  name: '摄像头B',
+  type: '6',
+  lnglat: '114.347510,23.106100'
+}, {
+  id: '13',
+  name: '公示牌A',
+  type: '7',
+  lnglat: '114.380550,23.079650'
+}, {
+  id: '14',
+  name: '公示牌B',
+  type: '7',
+  lnglat: '114.358410,23.087310'
+}]
+
+var videoData = [{
+  id: '1',
+  name: '水文局',
+  type: '1',
+  lnglat: '114.381920,23.072860',
+  videoUrl: 'hydrology.mp4',
+}, {
+  id: '2',
+  name: '环保局',
+  type: '2',
+  lnglat: '114.373940,23.052090',
+  videoUrl: 'protection.mp4',
+}, {
+  id: '3',
+  name: '东江流域局',
+  type: '3',
+  lnglat: '114.420120,23.071680',
+  videoUrl: 'djbasin.mp4',
+}]
+
 export default {
   // 获取水利基础数据
   getBasicList: config => {
@@ -794,6 +886,40 @@ export default {
     }
 
     distData = _.filter(projectData, function (o) {
+      return types.indexOf(o.type) !== -1;
+    });
+    return distData
+  },
+
+  // 获取水利工程数据
+  getMonitorList: config => {
+    var distData = []
+    var data = JSON.parse(config.body)
+    var types = data.types
+
+    // 返回全部
+    if (types && types.length && types[0] === '0') {
+      return monitorData
+    }
+
+    distData = _.filter(monitorData, function (o) {
+      return types.indexOf(o.type) !== -1;
+    });
+    return distData
+  },
+
+  // 获取水利工程数据
+  getVideoList: config => {
+    var distData = []
+    var data = JSON.parse(config.body)
+    var types = data.types
+
+    // 返回全部
+    if (types && types.length && types[0] === '0') {
+      return videoData
+    }
+
+    distData = _.filter(videoData, function (o) {
       return types.indexOf(o.type) !== -1;
     });
     return distData
