@@ -2,7 +2,12 @@
   <div class="a-pic">
     <div class="panel">
       <div>
-        水利基础
+        <div>水利基础</div>
+        <el-checkbox :indeterminate="jobBasicIsIndeterminate"
+                     v-model="jobBasicAllSelected"
+                     @change="handleJobBasicAllChange"
+                     size="mini"
+                     border>全选</el-checkbox>
         <el-checkbox-group v-model="jobBasicSelected"
                            @change="handleJobBasicChange"
                            size="mini">
@@ -13,7 +18,7 @@
         </el-checkbox-group>
       </div>
       <div v-if="isRiver">
-        河流分级
+        <div>河流分级</div>
         <el-radio-group v-model="jobBasicRiverSelected"
                         @change="handleJobBasicRiverChange"
                         size="mini">
@@ -24,7 +29,12 @@
         </el-radio-group>
       </div>
       <div>
-        水利工程
+        <div>水利工程</div>
+        <el-checkbox :indeterminate="jobProjectIsIndeterminate"
+                     v-model="jobProjectAllSelected"
+                     @change="handleJobProjectAllChange"
+                     size="mini"
+                     border>全选</el-checkbox>
         <el-checkbox-group v-model="jobProjectSelected"
                            @change="handleJobProjectChange"
                            size="mini">
@@ -35,7 +45,7 @@
         </el-checkbox-group>
       </div>
       <div>
-        水务监测站
+        <div>水务监测站</div>
         <el-checkbox-group v-model="jobMonitorSelected"
                            @change="handleJobMonitorChange"
                            size="mini">
@@ -66,6 +76,16 @@ export default {
       jobProjectList: [],
       jobMonitorList: [],
 
+      // 不定项时，全选按钮状态
+      jobBasicIsIndeterminate: false,
+      jobProjectIsIndeterminate: false,
+
+      // 全选按钮状态
+      jobBasicAllSelected: false,
+      jobProjectAllSelected: false,
+      jobMonitorAllSelected: false,
+      jobVideoAllSelected: false,
+
       // 左侧选择项
       jobBasicSelected: [],
       jobBasicRiverSelected: '0',
@@ -74,26 +94,23 @@ export default {
       jobVideoSelected: [],
       jobPublicitySelected: [],
 
-      // 左侧选择项选中项
-      jobBasicOptions: [
-        {
-          value: '0',
-          label: '全部'
-        }, {
-          value: '1',
-          label: '流域'
-        }, {
-          value: '2',
-          label: '河流'
-        }, {
-          value: '3',
-          label: '湖泊'
-        }, {
-          value: '4',
-          label: '红线'
-        }
+      // 水利基础备选项
+      jobBasicOptions: [{
+        value: '1',
+        label: '流域'
+      }, {
+        value: '2',
+        label: '河流'
+      }, {
+        value: '3',
+        label: '湖泊'
+      }, {
+        value: '4',
+        label: '红线'
+      }
       ],
 
+      // 河流备选项
       jobBasicRiverOptions: [
         {
           value: '0',
@@ -113,11 +130,9 @@ export default {
         }
       ],
 
+      // 水利工程备选项
       jobProjectOptions: [
         {
-          value: '0',
-          label: '全部'
-        }, {
           value: '1',
           label: '水库'
         }, {
@@ -132,6 +147,7 @@ export default {
         }
       ],
 
+      // 水务监测站
       jobMonitorOptions: [
         {
           value: '0',
@@ -165,7 +181,7 @@ export default {
         types: []
       },
       jobBasicRiverParam: {
-        types: []
+        types: undefined
       },
       jobProjectParam: {
         types: []
@@ -174,11 +190,47 @@ export default {
         types: []
       },
 
+      // 水利工程图标映射
       jobProjectIconMap: {
         '1': 'reservoir',
         '2': 'dam',
         '3': 'sluice',
         '4': 'pump'
+      },
+      // 水利基础配置项映射
+      jobBasicOptionMap: {
+        '1': {
+          zoom: 8,
+          lng: 114.754940,
+          lat: 24.038940,
+          options: {
+            color: "blue",
+            fillColor: "#FFFFFF",
+            fillOpacity: 0.5
+          }
+        },
+        '2': {
+        },
+        '3': {
+          zoom: 14,
+          lng: 114.378230,
+          lat: 23.082810,
+          options: {
+            color: "#FFFF00",
+            fillColor: '#0000FF',
+            fillOpacity: 0.5
+          }
+        },
+        '4': {
+          zoom: 15,
+          lng: 114.377890,
+          lat: 23.135820,
+          options: {
+            color: "#FF0000",
+            opacity: 1,
+            lineStyle: 'dashed'
+          }
+        }
       }
     }
   },
@@ -186,7 +238,7 @@ export default {
   computed: {
     // 是否显示河流分级
     isRiver () {
-      return this.jobBasicParam.types.indexOf('2') !== -1 ? true : false
+      return this.jobBasicParam.types && this.jobBasicParam.types.indexOf('2') !== -1 ? true : false
     },
   },
   mounted () {
@@ -196,13 +248,11 @@ export default {
     initMap () {
       this.tMap = new TMap('mapDiv', T)
     },
-    // 获取水利基础数据
-    getList () {
-    },
 
     // 获取水利基础数据
     getBasicList () {
       var that = this
+
       // 1.先清除现有的水利基础的覆盖物
       if (that.tMap.jobBasicOverLays && that.tMap.jobBasicOverLays.length) {
         var overLays = that.tMap.jobBasicOverLays
@@ -216,6 +266,10 @@ export default {
       // 2.再重新添加水利基础的覆盖物
       job['getBasicList'](that.jobBasicParam).then(response => {
         that.basicList = response.data;
+
+        // 设置模块名称，用于区分窗口属性映射关系keyMap的设置
+        that.tMap.moduleType = 'basic'
+        
         for (var i = 0; i < that.basicList.length; i++) {
           var item = that.basicList[i]
           var type = item.type
@@ -225,12 +279,16 @@ export default {
           var points = that.tMap.buildPoints(lnglatList)
 
           // 添加覆盖物并返回覆盖物
-          var overlay
-          if (type === '1' || type === '3') {
-            overlay = that.tMap.addPolygon(points, item)
-          } else if (type === '2' || type === '4') {
-            overlay = that.tMap.addPolyline(points, item)
-          }
+          var option = this.getOptionBytype(type)
+          var method = this.getOverlayMethodBytype(type)
+          var zoom = option && option.zoom ? option.zoom : that.tMap.zoom
+          var lng = option && option.lng ? option.lng : that.tMap.lng
+          var lat = option && option.lat ? option.lat : that.tMap.lat
+          var options = option && option.options ? option.options : {}
+
+          var overlay = that.tMap[method](points, item, options)
+
+          that.tMap.centerAndZoom(lng, lat, zoom)
 
           // 将水利基础覆盖物保存起来
           if (!that.tMap.jobBasicOverLays) {
@@ -287,6 +345,7 @@ export default {
     // 获取水利工程数据
     getProjectList () {
       var that = this
+
       // 1.先清除现有的水利工程的覆盖物
       if (that.tMap.jobProjectOverLays && that.tMap.jobProjectOverLays.length) {
         var overLays = that.tMap.jobProjectOverLays
@@ -307,6 +366,9 @@ export default {
 
           // 添加覆盖物并返回覆盖物
           var overlay = that.tMap.addMarker(point, item, iconUrl)
+
+          // var zoom = 13
+          // that.tMap.setZoom(zoom)
 
           // 将水利基础覆盖物保存起来
           if (!that.tMap.jobProjectOverLays) {
@@ -337,20 +399,54 @@ export default {
       })
     },
 
+    // 水利基础全选按钮事件
+    handleJobBasicAllChange (val) {
+      this.jobBasicSelected = [].concat()
+      if (val) {
+        for (var i in this.jobBasicOptions) {
+          var item = this.jobBasicOptions[i]
+          this.jobBasicSelected.push(item.value)
+        }
+      }
+      this.jobBasicIsIndeterminate = false
+      this.jobBasicParam.types = this.jobBasicSelected
+      this.getBasicList()
+    },
+
     // 水利基础选项改变事件
     handleJobBasicChange (val) {
+      let checkedCount = val.length;
+      this.jobBasicAllSelected = checkedCount === this.jobBasicOptions.length;
+      this.jobBasicIsIndeterminate = checkedCount > 0 && checkedCount < this.jobBasicOptions.length;
       this.jobBasicParam.types = val
       this.getBasicList()
     },
 
     // 河流选项改变事件
     handleJobBasicRiverChange (val) {
-      this.jobBasicRiverParam.types = val
+      this.jobBasicRiverParam.type = val
       this.getBasicRiverList()
+    },
+
+    // 水利工程全选按钮事件
+    handleJobProjectAllChange (val) {
+      this.jobProjectSelected = [].concat()
+      if (val) {
+        for (var i in this.jobProjectOptions) {
+          var item = this.jobProjectOptions[i]
+          this.jobProjectSelected.push(item.value)
+        }
+      }
+      this.jobProjectIsIndeterminate = false
+      this.jobProjectParam.types = this.jobProjectSelected
+      this.getProjectList()
     },
 
     // 水利工程选项改变事件
     handleJobProjectChange (val) {
+      let checkedCount = val.length;
+      this.jobProjectAllSelected = checkedCount === this.jobProjectOptions.length;
+      this.jobProjectIsIndeterminate = checkedCount > 0 && checkedCount < this.jobProjectOptions.length;
       this.jobProjectParam.types = val
       this.getProjectList()
     },
@@ -360,8 +456,23 @@ export default {
       this.getMonitorList()
     },
 
+    // 根据类别获取水利工程图标
     getIconBytype (type) {
       return this.jobProjectIconMap[type]
+    },
+
+    // 根据水利基础类别获取覆盖物样式
+    getOptionBytype (type) {
+      return this.jobBasicOptionMap[type]
+    },
+
+    // 根据水利基础类别获取覆盖物类型
+    getOverlayMethodBytype (type) {
+      if (type === '1' || type === '3') {
+        return 'addPolygon'
+      } else if (type === '2' || type === '4') {
+        return 'addPolyline'
+      }
     }
   }
 }

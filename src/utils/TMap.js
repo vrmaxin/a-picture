@@ -1,5 +1,8 @@
 /* eslint-disable no-debugger */
 /* eslint-disable no-unused-vars */
+import {
+  getkeyMapByModuleType
+} from './keyMap'
 var T
 var map
 class TMap {
@@ -16,21 +19,26 @@ class TMap {
     map = this.map
   }
   centerAndZoom(lng, lat, zoom) {
+    if (!zoom) {
+      zoom = map.getZoom()
+    }
     this.map.centerAndZoom(new T.LngLat(lng, lat), zoom);
+  }
+
+  setZoom(zoom) {
+    this.map.setZoom(zoom);
   }
 
   // 添加标注
   addMarker(point, data, iconUrl) {
     //创建图片对象
-    map.centerAndZoom(point, 12);
+    this.map.centerAndZoom(point);
 
     var marker
     var options = {}
     if (iconUrl) {
       var icon = new T.Icon({
         iconUrl: require(`@/assets/job/${iconUrl}.png`)
-        // iconSize: new T.Point(19, 27),
-        // iconAnchor: new T.Point(10, 25)
       });
       options = {
         icon: icon
@@ -57,17 +65,8 @@ class TMap {
     if (!points || !points.length) {
       return
     }
-    var defaultOptions = {
-      color: "blue",
-      weight: 2,
-      opacity: 0.5,
-      fillColor: "#FFFFFF",
-      fillOpacity: 0.5
-    }
-
-    var distOptions = Object.assign(defaultOptions, options)
     //创建线对象
-    var line = new T.Polyline(points, distOptions);
+    var line = new T.Polyline(points, options);
     // 添加线点击事件
     var that = this
     line.addEventListener("click", function (e) {
@@ -85,18 +84,8 @@ class TMap {
     if (!points || !points.length) {
       return
     }
-    var defaultOptions = {
-      color: "blue",
-      weight: 2,
-      opacity: 0.5,
-      fillColor: "#FFFFFF",
-      fillOpacity: 0.5
-    }
-
-    var distOptions = Object.assign(defaultOptions, options)
-
     //创建面对象
-    var polygon = new T.Polygon(points, distOptions);
+    var polygon = new T.Polygon(points, options);
     // 添加面点击事件
     var that = this
     polygon.addEventListener("click", function (e) {
@@ -126,7 +115,22 @@ class TMap {
     var html = ''
     for (var key in data) {
       var val = data[key]
-      html += `<div><span>${key}:</span><span>${val}</span></div>`
+      var keyMap = getkeyMapByModuleType(this.moduleType)
+      if (keyMap[key]) {
+        if (typeof val == "object" && Object.prototype.toString.call(val).toLowerCase() == "[object object]" && !val.length) {
+          var subKeyMap = keyMap[key]
+          var subData = val
+          for (var subKey in subData) {
+            var subVal = subData[subKey]
+            if (subKeyMap[subKey]) {
+              html += `<div><strong>${subKeyMap[subKey]}:</strong><span>${subVal}</span></div>`
+            }
+          }
+        } else {
+          html += `<div><strong>${keyMap[key]}:</strong><span>${val}</span></div>`
+        }
+      }
+
     }
     return html
   }
