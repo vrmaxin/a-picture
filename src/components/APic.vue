@@ -1,97 +1,202 @@
 <template>
   <div class="a-pic">
-    <div class="panel">
-      <div>
-        <div>水利基础</div>
-        <el-checkbox :indeterminate="jobBasicIsIndeterminate"
-                     v-model="jobBasicAllSelected"
-                     @change="handleJobBasicAllChange"
-                     size="mini"
-                     border>全选</el-checkbox>
-        <el-checkbox-group v-model="jobBasicSelected"
-                           @change="handleJobBasicChange"
-                           size="mini">
-          <el-checkbox v-for="(item,index) in jobBasicOptions"
-                       :label="item.value"
-                       :key="index"
-                       border>{{item.label}}</el-checkbox>
-        </el-checkbox-group>
-      </div>
-      <div v-if="isRiver">
-        <div>河流分级</div>
-        <el-radio-group v-model="jobBasicRiverSelected"
-                        @change="handleJobBasicRiverChange"
-                        size="mini">
-          <el-radio v-for="(item,index) in jobBasicRiverOptions"
-                    :label="item.value"
-                    :key="index"
-                    border>{{item.label}}</el-radio>
-        </el-radio-group>
-      </div>
-      <div>
-        <div>水利工程</div>
-        <el-checkbox :indeterminate="jobProjectIsIndeterminate"
-                     v-model="jobProjectAllSelected"
-                     @change="handleJobProjectAllChange"
-                     size="mini"
-                     border>全选</el-checkbox>
-        <el-checkbox-group v-model="jobProjectSelected"
-                           @change="handleJobProjectChange"
-                           size="mini">
-          <el-checkbox v-for="(item,index) in jobProjectOptions"
-                       :label="item.value"
-                       :key="index"
-                       border>{{item.label}}</el-checkbox>
-        </el-checkbox-group>
-      </div>
-      <div>
-        <div>水务监测站</div>
-        <el-checkbox :indeterminate="jobMonitorIsIndeterminate"
-                     v-model="jobMonitorAllSelected"
-                     @change="handleJobMonitorAllChange"
-                     size="mini"
-                     border>全选</el-checkbox>
-        <el-checkbox-group v-model="jobMonitorSelected"
-                           @change="handleJobMonitorChange"
-                           size="mini">
-          <el-checkbox v-for="(item,index) in jobMonitorOptions"
-                       :label="item.value"
-                       :key="index"
-                       border>{{item.label}}</el-checkbox>
-        </el-checkbox-group>
-      </div>
-      <div>
-        <div>视频监控</div>
-        <el-checkbox :indeterminate="jobVideoIsIndeterminate"
-                     v-model="jobVideoAllSelected"
-                     @change="handleJobVideoAllChange"
-                     size="mini"
-                     border>全选</el-checkbox>
-        <el-checkbox-group v-model="jobVideoSelected"
-                           @change="handleJobVideoChange"
-                           size="mini">
-          <el-checkbox v-for="(item,index) in jobVideoOptions"
-                       :label="item.value"
-                       :key="index"
-                       border>{{item.label}}</el-checkbox>
-        </el-checkbox-group>
-      </div>
-      <div>
-        <div>公示牌</div>
-        <el-checkbox :indeterminate="jobPublicIsIndeterminate"
-                     v-model="jobPublicAllSelected"
-                     @change="handleJobPublicAllChange"
-                     size="mini"
-                     border>全选</el-checkbox>
-        <el-checkbox-group v-model="jobPublicSelected"
-                           @change="handleJobPublicChange"
-                           size="mini">
-          <el-checkbox v-for="(item,index) in jobPublicOptions"
-                       :label="item.value"
-                       :key="index"
-                       border>{{item.label}}</el-checkbox>
-        </el-checkbox-group>
-      </div>
+    <div class="panel-l">
+      <el-row>
+        <el-col class="label-col"
+                :span="5">
+          <div class="label-wrap">
+            <div v-for="(item,index) in moduleMap"
+                 :key="index"
+                 :class="item.actived?'label-item actived':'label-item'"
+                 @click="handleClickModuleMapLabel(item,index)"
+                 @mouseover="handleMouseOverModuleMapLabel(item,index)"
+                 @mouseout="handleMouseOutModuleMapLabel(item,index)">
+              <img :src="item.actived?item.activedIcon:item.icon" />
+              {{item.label}}
+            </div>
+          </div>
+        </el-col>
+        <el-col :span="19">
+          <div v-if="moduleMap[0].actived">
+            <el-collapse v-model="monitorActiveNames"
+                         @change="handleChange">
+              <el-collapse-item title="水利基础"
+                                name="1">
+                <el-checkbox :indeterminate="jobBasicIsIndeterminate"
+                             v-model="jobBasicAllSelected"
+                             @change="handleJobBasicAllChange"
+                             size="small"
+                             border>全选</el-checkbox>
+                <el-checkbox-group v-model="jobBasicSelected"
+                                   @change="handleJobBasicChange"
+                                   size="small">
+                  <el-checkbox v-for="(item,index) in jobBasicOptions"
+                               :label="item.value"
+                               :key="index"
+                               border>{{item.label}}</el-checkbox>
+                </el-checkbox-group>
+                <div v-if="isRiver">
+                  <div class="river-level">河流分级</div>
+                  <el-radio-group v-model="jobBasicRiverSelected"
+                                  @change="handleJobBasicRiverChange"
+                                  size="small">
+                    <el-radio v-for="(item,index) in jobBasicRiverOptions"
+                              :label="item.value"
+                              :key="index"
+                              border>{{item.label}}</el-radio>
+                  </el-radio-group>
+                </div>
+              </el-collapse-item>
+              <el-collapse-item title="水利工程"
+                                name="2">
+                <el-checkbox :indeterminate="jobProjectIsIndeterminate"
+                             v-model="jobProjectAllSelected"
+                             @change="handleJobProjectAllChange"
+                             size="small"
+                             border>全选</el-checkbox>
+                <el-checkbox-group v-model="jobProjectSelected"
+                                   @change="handleJobProjectChange"
+                                   size="small">
+                  <el-checkbox v-for="(item,index) in jobProjectOptions"
+                               :label="item.value"
+                               :key="index"
+                               border>{{item.label}}</el-checkbox>
+                </el-checkbox-group>
+              </el-collapse-item>
+              <el-collapse-item title="水务监测站"
+                                name="3">
+                <el-checkbox :indeterminate="jobMonitorIsIndeterminate"
+                             v-model="jobMonitorAllSelected"
+                             @change="handleJobMonitorAllChange"
+                             size="small"
+                             border>全选</el-checkbox>
+                <el-checkbox-group v-model="jobMonitorSelected"
+                                   @change="handleJobMonitorChange"
+                                   size="small">
+                  <el-checkbox v-for="(item,index) in jobMonitorOptions"
+                               :label="item.value"
+                               :key="index"
+                               border>{{item.label}}</el-checkbox>
+                </el-checkbox-group>
+              </el-collapse-item>
+              <el-collapse-item title="视频监控"
+                                name="4">
+                <el-checkbox :indeterminate="jobVideoIsIndeterminate"
+                             v-model="jobVideoAllSelected"
+                             @change="handleJobVideoAllChange"
+                             size="small"
+                             border>全选</el-checkbox>
+                <el-checkbox-group v-model="jobVideoSelected"
+                                   @change="handleJobVideoChange"
+                                   size="small">
+                  <el-checkbox v-for="(item,index) in jobVideoOptions"
+                               :label="item.value"
+                               :key="index"
+                               border>{{item.label}}</el-checkbox>
+                </el-checkbox-group>
+              </el-collapse-item>
+              <el-collapse-item title="公示牌"
+                                name="5">
+                <el-checkbox :indeterminate="jobPublicIsIndeterminate"
+                             v-model="jobPublicAllSelected"
+                             @change="handleJobPublicAllChange"
+                             size="small"
+                             border>全选</el-checkbox>
+                <el-checkbox-group v-model="jobPublicSelected"
+                                   @change="handleJobPublicChange"
+                                   size="small">
+                  <el-checkbox v-for="(item,index) in jobPublicOptions"
+                               :label="item.value"
+                               :key="index"
+                               border>{{item.label}}</el-checkbox>
+                </el-checkbox-group>
+              </el-collapse-item>
+            </el-collapse>
+          </div>
+          <div v-if="moduleMap[1].actived">
+            <el-collapse v-model="jobActiveNames"
+                         @change="handleChange">
+              <el-collapse-item title="监测监控"
+                                name="1">
+                <el-checkbox :indeterminate="jobBasicIsIndeterminate"
+                             v-model="jobBasicAllSelected"
+                             @change="handleJobBasicAllChange"
+                             size="small"
+                             border>全选</el-checkbox>
+                <el-checkbox-group v-model="jobBasicSelected"
+                                   @change="handleJobBasicChange"
+                                   size="small">
+                  <el-checkbox v-for="(item,index) in jobBasicOptions"
+                               :label="item.value"
+                               :key="index"
+                               border>{{item.label}}</el-checkbox>
+                </el-checkbox-group>
+              </el-collapse-item>
+            </el-collapse>
+          </div>
+          <div v-if="moduleMap[2].actived">
+            <el-collapse v-model="jobActiveNames"
+                         @change="handleChange">
+              <el-collapse-item title="河长制专题"
+                                name="1">
+                <el-checkbox :indeterminate="jobBasicIsIndeterminate"
+                             v-model="jobBasicAllSelected"
+                             @change="handleJobBasicAllChange"
+                             size="small"
+                             border>全选</el-checkbox>
+                <el-checkbox-group v-model="jobBasicSelected"
+                                   @change="handleJobBasicChange"
+                                   size="small">
+                  <el-checkbox v-for="(item,index) in jobBasicOptions"
+                               :label="item.value"
+                               :key="index"
+                               border>{{item.label}}</el-checkbox>
+                </el-checkbox-group>
+              </el-collapse-item>
+            </el-collapse>
+          </div>
+          <div v-if="moduleMap[3].actived">
+            <el-collapse v-model="jobActiveNames"
+                         @change="handleChange">
+              <el-collapse-item title="统计分析"
+                                name="1">
+                <el-checkbox :indeterminate="jobBasicIsIndeterminate"
+                             v-model="jobBasicAllSelected"
+                             @change="handleJobBasicAllChange"
+                             size="small"
+                             border>全选</el-checkbox>
+                <el-checkbox-group v-model="jobBasicSelected"
+                                   @change="handleJobBasicChange"
+                                   size="small">
+                  <el-checkbox v-for="(item,index) in jobBasicOptions"
+                               :label="item.value"
+                               :key="index"
+                               border>{{item.label}}</el-checkbox>
+                </el-checkbox-group>
+              </el-collapse-item>
+            </el-collapse>
+          </div>
+        </el-col>
+      </el-row>
+    </div>
+    <div class="panel-r">
+      <el-table :data="jobBasicList"
+                stripe
+                border
+                size="small"
+                style="width: 100%">
+        <el-table-column header-align="center"
+                         align="center"
+                         prop="id"
+                         fixed
+                         label="编号">
+        </el-table-column>
+        <el-table-column header-align="center"
+                         align="center"
+                         prop="name"
+                         label="名称">
+        </el-table-column>
+      </el-table>
     </div>
     <div id="mapDiv"></div>
   </div>
@@ -105,8 +210,42 @@ export default {
   name: 'Apic',
   data () {
     return {
+      moduleMap: [
+        {
+          label: '工程设施',
+          icon: require('@/assets/job.png'),
+          activedIcon: require('@/assets/job_actived.png'),
+          actived: true
+        },
+        {
+          label: '监测监控',
+          icon: require('@/assets/monitor.png'),
+          activedIcon: require('@/assets/monitor_actived.png'),
+          actived: false
+        },
+        {
+          label: '河长制专题',
+          icon: require('@/assets/special.png'),
+          activedIcon: require('@/assets/special_actived.png'),
+          actived: false
+        },
+        {
+          label: '统计分析',
+          icon: require('@/assets/statistics.png'),
+          activedIcon: require('@/assets/statistics_actived.png'),
+          actived: false
+        }
+      ],
+
+      labelHoverTip: false,
+
       // 地图对象
       tMap: {},
+
+      jobActiveNames: ['1'],
+      monitorActiveNames: ['1'],
+      specialActiveNames: ['1'],
+      statisticsActiveNames: ['1'],
 
       // 接口返回列表数据
       jobBasicList: [],
@@ -157,19 +296,19 @@ export default {
       jobBasicRiverOptions: [
         {
           value: '0',
-          label: '河流'
+          label: '默认'
         }, {
           value: '1',
-          label: '市级河流'
+          label: '市级'
         }, {
           value: '2',
-          label: '区县河流'
+          label: '区县'
         }, {
           value: '3',
-          label: '乡镇河流'
+          label: '乡镇'
         }, {
           value: '4',
-          label: '村级河流'
+          label: '村级'
         }
       ],
 
@@ -207,12 +346,6 @@ export default {
         }, {
           value: '5',
           label: '梯级电站'
-        }, {
-          value: '6',
-          label: '摄像头'
-        }, {
-          value: '7',
-          label: '公示牌'
         }
       ],
 
@@ -297,6 +430,11 @@ export default {
           }
         },
         '2': {
+          options: {
+            color: "#0000FF",
+            opacity: 0.5,
+            weight: 10
+          }
         },
         '3': {
           zoom: 14,
@@ -336,6 +474,37 @@ export default {
       this.tMap = new TMap('mapDiv', T)
     },
 
+    handleChange (val) {
+      console.log(val);
+    },
+
+    // 模块标签改变事件
+    handleClickModuleMapLabel (item, index) {
+      for (var i in this.moduleMap) {
+        var tempItem = this.moduleMap[i]
+        tempItem.actived = false
+      }
+      this.moduleMap[index].actived = true
+      this.labelHoverTip = false
+    },
+
+    // 模块标签改变事件
+    handleMouseOverModuleMapLabel (item, index) {
+      if (this.moduleMap[index].actived) {
+      } else {
+        this.labelHoverTip = true
+        this.moduleMap[index].actived = true
+      }
+    },
+
+    // 模块标签改变事件
+    handleMouseOutModuleMapLabel (item, index) {
+      if (this.labelHoverTip) {
+        this.moduleMap[index].actived = false
+      }
+      this.labelHoverTip = false
+    },
+
     // 获取水利基础数据
     getBasicList () {
       var that = this
@@ -352,13 +521,13 @@ export default {
 
       // 2.再重新添加水利基础的覆盖物
       job['getBasicList'](that.jobBasicParam).then(response => {
-        that.basicList = response.data;
+        that.jobBasicList = response.data;
 
         // 设置模块名称，用于区分窗口属性映射关系keyMap的设置
         that.tMap.moduleType = 'basic'
 
-        for (var i = 0; i < that.basicList.length; i++) {
-          var item = that.basicList[i]
+        for (var i = 0; i < that.jobBasicList.length; i++) {
+          var item = that.jobBasicList[i]
           var type = item.type
           var lnglatList = item.lnglatList
 
@@ -728,21 +897,146 @@ export default {
     height: 100%;
   }
 
-  .panel {
+  .panel-l {
     position: absolute;
     left: 0;
     top: 0;
     height: 100%;
-    width: 250px;
+    width: 300px;
+    background: #ffffff;
+    z-index: 1000;
+
+    .el-row {
+      height: inherit;
+      .el-col.label-col {
+        height: inherit;
+        width: auto;
+        .label-wrap {
+          height: inherit;
+          overflow-y: hidden;
+          .label-item {
+            writing-mode: vertical-rl;
+            letter-spacing: 3px;
+            text-align: center;
+            padding: 0 15px;
+            height: 25%;
+            cursor: pointer;
+            border-right: 1px solid #ebebeb;
+            border-bottom: 1px solid #ebebeb;
+            font-weight: bold;
+          }
+          .label-item:hover {
+            color: #ffffff;
+            background: #2380e8;
+          }
+          .label-item.actived {
+            color: #ffffff;
+            background: #2380e8;
+          }
+        }
+      }
+
+      .el-col {
+        height: inherit;
+        .el-collapse {
+          .el-collapse-item {
+            .el-collapse-item__header {
+              padding-left: 1em;
+              font-size: 16px;
+              font-weight: bold;
+            }
+            .el-collapse-item__wrap {
+              .el-collapse-item__content {
+                .el-checkbox {
+                  margin-left: 10px;
+                  margin-top: 10px;
+                  margin-right: 0;
+                  padding-left: 15px;
+                  .el-checkbox__input {
+                    display: none;
+                  }
+                  .el-checkbox__label {
+                    padding-left: 0;
+                  }
+                }
+                .el-checkbox.is-checked::before {
+                  content: "\2714";
+                  font-size: 10px;
+                  height: 10px;
+                  position: absolute;
+                  color: #ffffff;
+                  right: 0;
+                  bottom: 2px;
+                  z-index: 10;
+                }
+                .el-checkbox.is-checked::after {
+                  content: "";
+                  width: 0;
+                  height: 0;
+                  border-bottom: 12px solid #0f89e5;
+                  border-left: 15px solid transparent;
+                  position: absolute;
+                  right: 0;
+                  bottom: 0;
+                }
+
+                .river-level {
+                  text-indent: 1em;
+                }
+
+                .el-radio {
+                  margin-left: 10px;
+                  margin-top: 10px;
+                  margin-right: 0;
+                  padding-left: 15px;
+                  .el-radio__input {
+                    display: none;
+                  }
+                  .el-radio__label {
+                    padding-left: 0;
+                  }
+                }
+
+                .el-radio.is-checked::before {
+                  content: "\2714";
+                  font-size: 10px;
+                  height: 10px;
+                  position: absolute;
+                  color: #ffffff;
+                  right: 0;
+                  bottom: 0px;
+                  z-index: 10;
+                }
+                .el-radio.is-checked::after {
+                  content: "";
+                  width: 0;
+                  height: 0;
+                  border-bottom: 12px solid #0f89e5;
+                  border-left: 15px solid transparent;
+                  position: absolute;
+                  right: 0;
+                  bottom: 0;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .panel-r {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 300px;
+    padding: 10px;
     background: #ffffff;
     z-index: 1000;
   }
 
-  .el-checkbox.is-bordered.el-checkbox--mini {
-    margin-left: 10px;
-  }
-
-  .el-radio--mini.is-bordered {
+  .el-radio--small.is-bordered {
     margin-left: 10px;
   }
 }
