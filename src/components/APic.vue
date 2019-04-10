@@ -16,7 +16,8 @@
             </div>
           </div>
         </el-col>
-        <el-col :span="19">
+        <el-col :span="19"
+                class="collapse-col">
           <div v-if="moduleMap[0].actived">
             <el-collapse v-model="monitorActiveNames"
                          @change="handleChange">
@@ -180,23 +181,47 @@
       </el-row>
     </div>
     <div class="panel-r">
-      <el-table :data="jobBasicList"
-                stripe
-                border
-                size="small"
-                style="width: 100%">
-        <el-table-column header-align="center"
-                         align="center"
-                         prop="id"
-                         fixed
-                         label="编号">
-        </el-table-column>
-        <el-table-column header-align="center"
-                         align="center"
-                         prop="name"
-                         label="名称">
-        </el-table-column>
-      </el-table>
+      <el-row>
+        <el-col class="tab-col"
+                :span="5">
+          <div class="tab-wrap">
+            <div v-for="(item,index) in typeMap"
+                 :key="index"
+                 :class="item.actived?'label-item actived':'label-item'"
+                 @click="handleClickTypeMapLabel(item,index)"
+                 @mouseover="handleMouseOverTypeMapLabel(item,index)"
+                 @mouseout="handleMouseOutTypeMapLabel(item,index)">
+              <img :src="item.actived?item.activedIcon:item.icon" />
+              {{item.label}}
+              <div class="tab-label">
+                <img :src="item.actived?item.activedIcon:item.icon" />
+                {{item.label}}
+              </div>
+            </div>
+          </div>
+        </el-col>
+        <el-col class="table-col"
+                :span="5">
+          <el-table :data="jobBasicList"
+                    stripe
+                    border
+                    size="small"
+                    style="width: 100%">
+            <el-table-column header-align="center"
+                             align="center"
+                             prop="id"
+                             fixed
+                             label="编号">
+            </el-table-column>
+            <el-table-column header-align="center"
+                             align="center"
+                             prop="name"
+                             label="名称">
+            </el-table-column>
+          </el-table>
+        </el-col>
+
+      </el-row>
     </div>
     <div id="mapDiv"></div>
   </div>
@@ -235,6 +260,21 @@ export default {
           activedIcon: require('@/assets/statistics_actived.png'),
           actived: false
         }
+      ],
+
+      typeMap: [
+        {
+          label: '水利基础',
+          icon: require('@/assets/global/close.png'),
+          activedIcon: require('@/assets/global/close_actived.png'),
+          actived: true
+        },
+        {
+          label: '水利工程',
+          icon: require('@/assets/global/close.png'),
+          activedIcon: require('@/assets/global/close_actived.png'),
+          actived: false
+        },
       ],
 
       labelHoverTip: false,
@@ -501,6 +541,33 @@ export default {
     handleMouseOutModuleMapLabel (item, index) {
       if (this.labelHoverTip) {
         this.moduleMap[index].actived = false
+      }
+      this.labelHoverTip = false
+    },
+
+    // 模块标签改变事件
+    handleClickTypeMapLabel (item, index) {
+      for (var i in this.typeMap) {
+        var tempItem = this.typeMap[i]
+        tempItem.actived = false
+      }
+      this.typeMap[index].actived = true
+      this.labelHoverTip = false
+    },
+
+    // 模块标签改变事件
+    handleMouseOverTypeMapLabel (item, index) {
+      if (this.typeMap[index].actived) {
+      } else {
+        this.labelHoverTip = true
+        this.typeMap[index].actived = true
+      }
+    },
+
+    // 模块标签改变事件
+    handleMouseOutTypeMapLabel (item, index) {
+      if (this.labelHoverTip) {
+        this.typeMap[index].actived = false
       }
       this.labelHoverTip = false
     },
@@ -892,8 +959,8 @@ export default {
 .a-pic {
   #mapDiv {
     position: absolute;
-    left: 200px;
-    width: calc(100% - 200px);
+    left: 400px;
+    width: calc(100% - 400px);
     height: 100%;
   }
 
@@ -902,7 +969,7 @@ export default {
     left: 0;
     top: 0;
     height: 100%;
-    width: 300px;
+    width: 400px;
     background: #ffffff;
     z-index: 1000;
 
@@ -910,20 +977,21 @@ export default {
       height: inherit;
       .el-col.label-col {
         height: inherit;
-        width: auto;
+        width: 54px;
         .label-wrap {
           height: inherit;
           overflow-y: hidden;
+          border-right: 1px solid #ebebeb;
           .label-item {
             writing-mode: vertical-rl;
             letter-spacing: 3px;
+            font-size: 17px;
             text-align: center;
-            padding: 0 15px;
-            height: 25%;
+            padding: 20px 15px;
             cursor: pointer;
-            border-right: 1px solid #ebebeb;
             border-bottom: 1px solid #ebebeb;
             font-weight: bold;
+            color: #434343;
           }
           .label-item:hover {
             color: #ffffff;
@@ -936,27 +1004,35 @@ export default {
         }
       }
 
-      .el-col {
+      .el-col.collapse-col {
         height: inherit;
+        width: 346px;
         .el-collapse {
           .el-collapse-item {
             .el-collapse-item__header {
+              letter-spacing: 2px;
               padding-left: 1em;
-              font-size: 16px;
+              font-size: 17px;
               font-weight: bold;
+              color: #434343;
             }
             .el-collapse-item__wrap {
               .el-collapse-item__content {
+                overflow: hidden;
+                padding-bottom: 5px;
                 .el-checkbox {
+                  float: left;
                   margin-left: 10px;
-                  margin-top: 10px;
+                  margin-bottom: 10px;
                   margin-right: 0;
-                  padding-left: 15px;
+                  padding: 6.5px 15px 6.5px 15px;
+                  height: 34px;
                   .el-checkbox__input {
                     display: none;
                   }
                   .el-checkbox__label {
                     padding-left: 0;
+                    font-size: 15px;
                   }
                 }
                 .el-checkbox.is-checked::before {
@@ -986,7 +1062,7 @@ export default {
 
                 .el-radio {
                   margin-left: 10px;
-                  margin-top: 10px;
+                  margin-bottom: 10px;
                   margin-right: 0;
                   padding-left: 15px;
                   .el-radio__input {
@@ -1030,10 +1106,84 @@ export default {
     right: 0;
     top: 0;
     height: 100%;
-    width: 300px;
-    padding: 10px;
+    width: 350px;
     background: #ffffff;
     z-index: 1000;
+    .el-row {
+      height: inherit;
+      .el-col.tab-col {
+        height: inherit;
+        width: 35px;
+        .tab-wrap {
+          height: inherit;
+          overflow-y: hidden;
+          border-right: 1px solid #ebebeb;
+          width: inherit;
+          .label-item {
+            width: inherit;
+            writing-mode: vertical-rl;
+            letter-spacing: 3px;
+            font-size: 14px;
+            text-align: center;
+            padding: 20px 3px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #434343;
+            position: relative;
+
+            .tab-label {
+              position: absolute;
+              top: 0;
+              left: -10px;
+              width: inherit;
+              writing-mode: vertical-rl;
+              letter-spacing: 3px;
+              font-size: 14px;
+              text-align: center;
+              padding: 20px 3px;
+              cursor: pointer;
+              z-index: 10;
+            }
+          }
+          .label-item:hover {
+            color: #ffffff;
+          }
+          .label-item.actived {
+            color: #ffffff;
+          }
+
+          .label-item.actived::before {
+            content: "一二三四五";
+            padding: 20px 0;
+            width: 0;
+            border-bottom: 25px solid transparent;
+            border-top: 25px solid transparent;
+            border-right: 40px solid #2380e8;
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 10;
+          }
+          .label-item::before {
+            content: "一二三四五";
+            padding: 20px 0;
+            width: 0;
+            border-bottom: 25px solid transparent;
+            border-top: 25px solid transparent;
+            border-right: 40px solid #e8e8e8;
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 9;
+          }
+        }
+      }
+      .el-col.table-col {
+        height: inherit;
+        width: 315px;
+        padding: 10px;
+      }
+    }
   }
 
   .el-radio--small.is-bordered {
