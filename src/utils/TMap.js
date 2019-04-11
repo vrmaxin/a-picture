@@ -17,7 +17,30 @@ class TMap {
     // 用于存放当前弹窗对象的数组
     this.currentInfoWinArr = []
     map = this.map
+
+    map.addEventListener("zoomend", this.mapZoomend);
   }
+
+  mapZoomend(type, target) {
+    this.zoom = map.getZoom()
+    var overlays = map.getOverlays()
+    for (var i in overlays) {
+      var overlay = overlays[i]
+      var overlayType = overlay.getType()
+      if (overlayType === 2) {
+        var icon = overlay.getIcon()
+        var x = 20,
+          y = 20
+        if (this.zoom >= 12) {
+          x = 32
+          y = 32
+        }
+        // 设置大图标
+        icon.setIconSize(new T.Point(x, y))
+      }
+    }
+  }
+
   centerAndZoom(lng, lat, zoom) {
     if (!zoom) {
       zoom = map.getZoom()
@@ -128,15 +151,27 @@ class TMap {
           }
         } else {
           if (key === 'videoUrl') {
-            var path = require(`@/static/${val}`)
-            html += `<div><video style="width:300px;height:150px;" controls="controls" autoplay src=${path}></video></div>`
+            this.videoPath = require(`@/static/${val}`)
+            var videoPath = require(`@/static/${val}`)
+            var imgPath = require(`@/assets/global/nail.png`)
+            html += `<div><video style="width:300px;height:150px;" controls="controls" autoplay src=${videoPath}></video></div>`
+            html += `<div style="text-align:right;"><img style="cursor:pointer;" title="videoPath" id="nail" onclick="${(function(fun,val){return function(){fun(val)}})(this.nailVideoFun,val)}" src=${imgPath}></div>`
           } else {
             html += `<div><strong>${keyMap[key]}:</strong><span>${val}</span></div>`
           }
         }
       }
-
     }
+    var that = this
+    that.vm.$nextTick(() => {
+      var nailDom = document.getElementById('nail')
+      if (nailDom && that.videoPath) {
+        nailDom.addEventListener('click', function () {
+          that.vm.nailVideo(that.videoPath)
+        })
+      }
+    })
+
     return html
   }
 

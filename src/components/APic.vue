@@ -229,6 +229,18 @@
                              label="名称">
             </el-table-column>
           </el-table>
+          <div v-for="(item,index) in videoMap"
+               :key="index">
+            <div style="text-align:right;"><img v-if="item.url"
+                   :src="closeIcon"
+                   @click="closeVideo(index)">
+            </div>
+            <video style="width:300px;height:150px;"
+                   controls="controls"
+                   autoplay
+                   v-if="item.url"
+                   :src="item.url"></video>
+          </div>
         </el-col>
 
       </el-row>
@@ -245,6 +257,8 @@ export default {
   name: 'Apic',
   data () {
     return {
+
+      closeIcon: require('@/assets/global/close.png'),
       hideLeftPanel: false,
       hideRightPanel: false,
       moduleMap: [
@@ -293,6 +307,12 @@ export default {
 
       // 地图对象
       tMap: {},
+
+      videoMap: [
+        {
+          url: ''
+        }
+      ],
 
       jobActiveNames: ['1'],
       monitorActiveNames: ['1'],
@@ -522,6 +542,9 @@ export default {
     this.initMap()
   },
   methods: {
+    closeVideo (index) {
+      this.videoMap.splice(index, 1)
+    },
     handleTogglePanel (type) {
       if (type === 'left') {
         this.hideLeftPanel = !this.hideLeftPanel
@@ -532,6 +555,7 @@ export default {
 
     initMap () {
       this.tMap = new TMap('mapDiv', T)
+      this.tMap.vm = this
     },
 
     handleChange (val) {
@@ -694,7 +718,7 @@ export default {
         var overLays = that.tMap.jobProjectOverLays
         for (var i = 0; i < overLays.length; i++) {
           var overlay = overLays[i]
-          that.tMap.removeOverLay(overlay)
+          // that.tMap.removeOverLay(overlay)
         }
         delete that.tMap.jobProjectOverLays
       }
@@ -785,8 +809,10 @@ export default {
           var point = that.tMap.buildPoint(lnglat)
           var iconUrl = that.getIconBytype(that.tMap.moduleType, item.type)
 
+          // 传递订住视频的方法
+          that.tMap.nailVideoFun = this.nailVideo
           // 添加覆盖物并返回覆盖物
-          var overlay = that.tMap.addMarker(point, item, iconUrl)
+          var overlay = that.tMap.addMarker(point, item, iconUrl, this.nailVideo)
 
           // 将水利基础覆盖物保存起来
           if (!that.tMap.jobVideoOverLays) {
@@ -796,6 +822,14 @@ export default {
         }
         console.log(response.data);
       })
+    },
+
+    // 订住视频
+    nailVideo (videoUrl) {
+      var item = {
+        url: videoUrl
+      }
+      this.videoMap.push(item)
     },
 
     // 获取水务监测站数据
@@ -1108,6 +1142,7 @@ export default {
                 }
 
                 .river-level {
+                  clear: left;
                   text-indent: 1em;
                 }
 
