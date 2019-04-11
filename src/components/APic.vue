@@ -1,7 +1,7 @@
 <template>
   <div class="a-pic">
-    <div class="panel-l">
-      <el-row>
+    <div :class="hideLeftPanel?'panel-l panel-l-hidden':'panel-l'">
+      <el-row :class="hideLeftPanel?'panel-hidden':''">
         <el-col class="label-col"
                 :span="5">
           <div class="label-wrap">
@@ -179,9 +179,19 @@
           </div>
         </el-col>
       </el-row>
+      <div class="left-toggle"
+           @click="handleTogglePanel('left')">
+        <span v-if="!hideLeftPanel">&lt;</span>
+        <span v-else>&gt;</span>
+      </div>
     </div>
-    <div class="panel-r">
-      <el-row>
+    <div :class="hideRightPanel?'panel-r panel-r-hidden':'panel-r'">
+      <div class="right-toggle"
+           @click="handleTogglePanel('right')">
+        <span v-if="!hideRightPanel">&gt;</span>
+        <span v-else>&lt;</span>
+      </div>
+      <el-row :class="hideRightPanel?'panel-hidden':''">
         <el-col class="tab-col"
                 :span="5">
           <div class="tab-wrap">
@@ -235,6 +245,8 @@ export default {
   name: 'Apic',
   data () {
     return {
+      hideLeftPanel: false,
+      hideRightPanel: false,
       moduleMap: [
         {
           label: '工程设施',
@@ -510,6 +522,14 @@ export default {
     this.initMap()
   },
   methods: {
+    handleTogglePanel (type) {
+      if (type === 'left') {
+        this.hideLeftPanel = !this.hideLeftPanel
+      } else if (type === 'right') {
+        this.hideRightPanel = !this.hideRightPanel
+      }
+    },
+
     initMap () {
       this.tMap = new TMap('mapDiv', T)
     },
@@ -688,7 +708,7 @@ export default {
           var lnglat = item.lnglat
           // 构建坐标点列表
           var point = that.tMap.buildPoint(lnglat)
-          var iconUrl = that.getIconBytype(item.type)
+          var iconUrl = that.getIconBytype(that.tMap.moduleType, item.type)
 
           // 添加覆盖物并返回覆盖物
           var overlay = that.tMap.addMarker(point, item, iconUrl)
@@ -959,9 +979,20 @@ export default {
 .a-pic {
   #mapDiv {
     position: absolute;
-    left: 400px;
-    width: calc(100% - 400px);
+    width: calc(100vw);
     height: 100%;
+  }
+
+  .panel-l-hidden {
+    left: -400px !important;
+  }
+
+  .panel-r-hidden {
+    // right: -350px !important;
+  }
+
+  .panel-hidden {
+    display: none;
   }
 
   .panel-l {
@@ -972,7 +1003,27 @@ export default {
     width: 400px;
     background: #ffffff;
     z-index: 1000;
+    border-right: 1px solid #e7e7e7;
 
+    .left-toggle {
+      position: absolute;
+      right: -20px;
+      bottom: 90px;
+      width: 20px;
+      height: 90px;
+      background: #ffffff;
+      border-radius: 0 3px 3px 0;
+      display: table;
+      box-shadow: 1px 0 2px #e7e7e7;
+      cursor: pointer;
+      span {
+        display: table-cell;
+        vertical-align: middle;
+        text-align: center;
+        color: #aaaaaa;
+        font-size: 16px;
+      }
+    }
     .el-row {
       height: inherit;
       .el-col.label-col {
@@ -1106,9 +1157,30 @@ export default {
     right: 0;
     top: 0;
     height: 100%;
-    width: 350px;
+    width: auto;
     background: #ffffff;
     z-index: 1000;
+
+    .right-toggle {
+      position: absolute;
+      left: -20px;
+      bottom: 90px;
+      width: 20px;
+      height: 90px;
+      background: #ffffff;
+      border-radius: 0 3px 3px 0;
+      display: table;
+      box-shadow: 1px 0 2px #e7e7e7;
+      cursor: pointer;
+      span {
+        display: table-cell;
+        vertical-align: middle;
+        text-align: center;
+        color: #aaaaaa;
+        font-size: 16px;
+      }
+    }
+
     .el-row {
       height: inherit;
       .el-col.tab-col {
@@ -1116,7 +1188,7 @@ export default {
         width: 35px;
         .tab-wrap {
           height: inherit;
-          overflow-y: hidden;
+          overflow: hidden;
           border-right: 1px solid #ebebeb;
           width: inherit;
           .label-item {
