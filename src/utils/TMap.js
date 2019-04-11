@@ -31,9 +31,12 @@ class TMap {
         var icon = overlay.getIcon()
         var x = 20,
           y = 20
-        if (this.zoom >= 12) {
+        if (this.zoom > 12) {
           x = 32
           y = 32
+        } else if (this.zoom <= 10) {
+          x = 10
+          y = 10
         }
         // 设置大图标
         icon.setIconSize(new T.Point(x, y))
