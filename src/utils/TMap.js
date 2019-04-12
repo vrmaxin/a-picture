@@ -85,6 +85,11 @@ class TMap {
     return marker
   }
 
+  // 添加覆盖物
+  addOverLay(overLay) {
+    map.addOverLay(overLay);
+  }
+
   // 添加线
   addPolyline(points, data, options) {
     // 没有点时直接返回
@@ -156,9 +161,10 @@ class TMap {
           if (key === 'videoUrl') {
             this.videoPath = require(`@/static/${val}`)
             var videoPath = require(`@/static/${val}`)
-            var imgPath = require(`@/assets/global/nail.png`)
+            var zoomImgPath = require(`@/assets/global/zoom.png`)
+            var nailImgPath = require(`@/assets/global/nail.png`)
             html += `<div><video style="width:300px;height:150px;" controls="controls" autoplay src=${videoPath}></video></div>`
-            html += `<div style="text-align:right;"><img style="cursor:pointer;" title="videoPath" id="nail" onclick="${(function(fun,val){return function(){fun(val)}})(this.nailVideoFun,val)}" src=${imgPath}></div>`
+            html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><img style="cursor:pointer;" title="videoPath" id="zoomBtn" src=${zoomImgPath}><img style="cursor:pointer;" title="videoPath" id="nailBtn" src=${nailImgPath}></div></div>`
           } else {
             html += `<div><strong>${keyMap[key]}:</strong><span>${val}</span></div>`
           }
@@ -167,10 +173,20 @@ class TMap {
     }
     var that = this
     that.vm.$nextTick(() => {
-      var nailDom = document.getElementById('nail')
+
+      // 订住按钮添加点击事件
+      var nailDom = document.getElementById('nailBtn')
       if (nailDom && that.videoPath) {
         nailDom.addEventListener('click', function () {
           that.vm.nailVideo(that.videoPath)
+        })
+      }
+
+      // 缩放按钮添加点击事件
+      var zoomDom = document.getElementById('zoomBtn')
+      if (zoomDom && that.videoPath) {
+        zoomDom.addEventListener('click', function () {
+          that.vm.zoomVideo(that.videoPath)
         })
       }
     })

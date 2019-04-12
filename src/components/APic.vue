@@ -1,5 +1,21 @@
 <template>
   <div class="a-pic">
+    <div class="max-video"
+         v-for="(item,index) in maxVideoMap"
+         :key="index">
+      <div style="margin:0 auto;width: 1280px;">
+        <div style="text-align:right;">
+          <img v-if="item.url"
+               :src="closeIcon"
+               @click="closeMaxVideo(index)">
+        </div>
+        <video style="width:inhert;height:inhert;"
+               controls="controls"
+               autoplay
+               v-if="item.url"
+               :src="item.url"></video>
+      </div>
+    </div>
     <div :class="hideLeftPanel?'panel-l panel-l-hidden':'panel-l'">
       <el-row :class="hideLeftPanel?'panel-hidden':''">
         <el-col class="label-col"
@@ -315,6 +331,12 @@ export default {
         }
       ],
 
+      maxVideoMap: [
+        {
+          url: ''
+        }
+      ],
+
       jobActiveNames: ['1'],
       monitorActiveNames: ['1'],
       specialActiveNames: ['1'],
@@ -531,7 +553,7 @@ export default {
         },
         '5': {
           options: {
-            color: "#00FF00",
+            color: "#0000FF",
             opacity: 0.5,
             weight: 10
           }
@@ -551,7 +573,6 @@ export default {
   },
   methods: {
     handleClickRow (row, column, event) {
-      debugger
       var lnglat = row.lnglat ? row.lnglat : row.lnglatList[0]
       var lng = lnglat.split(',')[0]
       var lat = lnglat.split(',')[1]
@@ -559,6 +580,9 @@ export default {
     },
     closeVideo (index) {
       this.videoMap.splice(index, 1)
+    },
+    closeMaxVideo () {
+      this.maxVideoMap[0].url = ''
     },
     handleTogglePanel (type) {
       if (type === 'left') {
@@ -676,7 +700,16 @@ export default {
           if (!that.tMap.jobBasicOverLays) {
             that.tMap.jobBasicOverLays = []
           }
+
           that.tMap.jobBasicOverLays.push(overlay)
+
+          // 将水利河流覆盖物保存起来
+          if (type === '2') {
+            if (!that.tMap.jobBasicTopRiverOverLays) {
+              that.tMap.jobBasicTopRiverOverLays = []
+            }
+            that.tMap.jobBasicTopRiverOverLays.push(overlay)
+          }
         }
       })
     },
@@ -684,6 +717,7 @@ export default {
     // 获取分级河流数据
     getBasicRiverList () {
       var that = this
+
       // 1.先清除现有的水利基础的覆盖物
       if (that.tMap.jobBasicRiverOverLays && that.tMap.jobBasicRiverOverLays.length) {
         var overLays = that.tMap.jobBasicRiverOverLays
@@ -693,6 +727,22 @@ export default {
         }
         delete that.tMap.jobBasicRiverOverLays
       }
+
+      if (that.tMap.jobBasicTopRiverOverLays && that.tMap.jobBasicTopRiverOverLays.length) {
+        var overlays = that.tMap.jobBasicTopRiverOverLays
+        for (var i in overlays) {
+          var overlay = overlays[i]
+
+          // 如果是默认河流，则显示整条完整河流
+          if (this.jobBasicRiverParam.type === '0') {
+            that.tMap.addOverLay(overlay);
+            return
+          } else {
+            that.tMap.removeOverLay(overlay)
+          }
+        }
+      }
+
 
       // 2.再重新添加水利基础的覆盖物
       job['getBasicRiverList'](that.jobBasicRiverParam).then(response => {
@@ -820,6 +870,7 @@ export default {
 
           // 传递订住视频的方法
           that.tMap.nailVideoFun = this.nailVideo
+          that.tMap.zoomVideoFun = this.zoomVideo
           // 添加覆盖物并返回覆盖物
           var overlay = that.tMap.addMarker(point, item, iconUrl, this.nailVideo)
 
@@ -839,6 +890,13 @@ export default {
         url: videoUrl
       }
       this.videoMap.push(item)
+    },
+
+    zoomVideo (videoUrl) {
+      var item = {
+        url: videoUrl
+      }
+      this.maxVideoMap[0] = Object.assign(this.maxVideoMap[0], item)
     },
 
     // 获取水务监测站数据
@@ -1020,6 +1078,19 @@ export default {
 </script>
 <style lang="scss">
 .a-pic {
+  .max-video {
+    overflow: hidden;
+    z-index: 1001;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+    width: auto;
+    height: auto;
+  }
+
   #mapDiv {
     position: absolute;
     width: calc(100vw);
