@@ -90,9 +90,31 @@ var keyMap = {
   },
   'video': {
     name: '名称',
+    stationName: '测站名称',
+    riverName: '河流名称',
+    drainageName: '水系名称',
+    basinName: '流域名称',
+    // lnglat: '114.23,31.143',
+    stationAddress: '站址',
+    administrativeDivis: '行政区划',
+
+    organ: '管理单位',
+    stationType: '站类',
     videoUrl: true
   },
   'public': {
-    name: '名称'
+    // name: '名称'
+    stationName: '测站名称',
+    riverName: '河流名称',
+    drainageName: '水系名称',
+    basinName: '流域名称',
+    // lnglat: '114.23,31.143',
+    stationAddress: '站址',
+    administrativeDivis: '行政区划',
+
+    organ: '管理单位',
+    stationType: '站类',
+    mark: '备注',
+    imgUrl: true
   }
 }

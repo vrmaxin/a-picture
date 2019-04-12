@@ -1551,22 +1551,127 @@ var monitorData = [{
 
 var videoData = [{
   id: '1',
-  name: '水文局',
+  // name: '水文局',
+  stationName: '水文局',
+  riverName: '东江',
+  drainageName: '东江',
+  basinName: '东江流域',
+  // lnglat: '114.23,31.143',
+  stationAddress: '站址不了解',
+  administrativeDivis: '惠州',
+
+  organ: '管理单位B',
+  stationType: '站类是哪个',
+  mark: '没有备注',
   type: '1',
   lnglat: '114.381920,23.072860',
   videoUrl: 'hydrology.mp4',
 }, {
   id: '2',
-  name: '环保局',
+  // name: '环保局',
+  stationName: '环保局',
+  riverName: '东江',
+  drainageName: '东江',
+  basinName: '东江流域',
+  // lnglat: '114.23,31.143',
+  stationAddress: '站址不了解',
+  administrativeDivis: '惠州',
+
+  organ: '管理单位B',
+  stationType: '站类是哪个',
+  mark: '没有备注',
   type: '2',
   lnglat: '114.373940,23.052090',
   videoUrl: 'protection.mp4',
 }, {
   id: '3',
-  name: '东江流域局',
+  // name: '东江流域局',
+  stationName: '东江流域局',
+  riverName: '东江',
+  drainageName: '东江',
+  basinName: '东江流域',
+  // lnglat: '114.23,31.143',
+  stationAddress: '站址不了解',
+  administrativeDivis: '惠州',
+
+  organ: '管理单位B',
+  stationType: '站类是哪个',
+  mark: '没有备注',
   type: '3',
   lnglat: '114.420120,23.071680',
   videoUrl: 'djbasin.mp4',
+}]
+
+var publicData = [{
+  id: '1',
+  // name: '公告牌1',
+  stationName: '公告牌1',
+  riverName: '东江',
+  drainageName: '东江',
+  basinName: '东江流域',
+  // lnglat: '114.23,31.143',
+  stationAddress: '站址不了解',
+  administrativeDivis: '惠州',
+
+  organ: '管理单位B',
+  stationType: '站类是哪个',
+  mark: '没有备注',
+  isReal:'1',
+  imgUrl:'public_test_img1.jpg',
+  type: '1',
+  lnglat: '114.382700,23.079260'
+}, {
+  id: '2',
+  // name: '公告牌2',
+  stationName: '公告牌2',
+  riverName: '东江',
+  drainageName: '东江',
+  basinName: '东江流域',
+  // lnglat: '114.23,31.143',
+  stationAddress: '站址不了解',
+  administrativeDivis: '惠州',
+
+  organ: '管理单位B',
+  stationType: '站类是哪个',
+  mark: '没有备注',
+  isReal:'1',
+  type: '1',
+  imgUrl:'public_test_img2.jpg',
+  lnglat: '114.374200,23.060780'
+}, {
+  id: '3',
+  // name: '公告牌3',
+  stationName: '公告牌3',
+  riverName: '东江',
+  drainageName: '东江',
+  basinName: '东江流域',
+  // lnglat: '114.23,31.143',
+  stationAddress: '站址不了解',
+  administrativeDivis: '惠州',
+
+  organ: '管理单位B',
+  stationType: '站类是哪个',
+  mark: '没有备注',
+  isReal:'0',
+  type: '1',
+  lnglat: '114.340550,23.064970'
+}, {
+  id: '4',
+  // name: '公告牌4',
+  stationName: '公告牌4',
+  riverName: '东江',
+  drainageName: '东江',
+  basinName: '东江流域',
+  // lnglat: '114.23,31.143',
+  stationAddress: '站址不了解',
+  administrativeDivis: '惠州',
+
+  organ: '管理单位B',
+  stationType: '站类是哪个',
+  mark: '没有备注',
+  isReal:'0',
+  type: '1',
+  lnglat: '114.352050,23.085650'
 }]
 
 export default {
@@ -1649,6 +1754,23 @@ export default {
     }
 
     distData = _.filter(videoData, function (o) {
+      return types.indexOf(o.type) !== -1;
+    });
+    return distData
+  },
+
+  // 获取水利工程数据
+  getPublicityList: config => {
+    var distData = []
+    var data = JSON.parse(config.body)
+    var types = data.types
+    debugger
+    // 返回全部
+    if (types && types.length && types[0] === '0') {
+      return publicData
+    }
+
+    distData = _.filter(publicData, function (o) {
       return types.indexOf(o.type) !== -1;
     });
     return distData

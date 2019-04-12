@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /* eslint-disable no-debugger */
 /* eslint-disable no-unused-vars */
 import {
@@ -159,11 +160,22 @@ class TMap {
           }
         } else {
           if (key === 'videoUrl') {
+            this.currentMediaType = 'video'
             this.videoPath = require(`@/static/${val}`)
             var videoPath = require(`@/static/${val}`)
             var zoomImgPath = require(`@/assets/global/zoom.png`)
             var nailImgPath = require(`@/assets/global/nail.png`)
-            html += `<div><video style="width:300px;height:150px;" controls="controls" autoplay src=${videoPath}></video></div>`
+            // 暂时隐藏视频
+            // html += `<div><video style="width:300px;height:150px;" controls="controls" autoplay src=${videoPath}></video></div>`
+            html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><img style="cursor:pointer;" title="videoPath" id="zoomBtn" src=${zoomImgPath}><img style="cursor:pointer;" title="videoPath" id="nailBtn" src=${nailImgPath}></div></div>`
+          } else if(key === 'imgUrl'){
+            this.currentMediaType = 'img'
+            this.imgPath = require(`@/static/${val}`)
+            var imgPath = require(`@/static/${val}`)
+            var zoomImgPath = require(`@/assets/global/zoom.png`)
+            var nailImgPath = require(`@/assets/global/nail.png`)
+            html += `<div><img style="width:300px;height:150px;" controls="controls" autoplay src=${imgPath}></img></div>`
+
             html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><img style="cursor:pointer;" title="videoPath" id="zoomBtn" src=${zoomImgPath}><img style="cursor:pointer;" title="videoPath" id="nailBtn" src=${nailImgPath}></div></div>`
           } else {
             html += `<div><strong>${keyMap[key]}:</strong><span>${val}</span></div>`
@@ -176,17 +188,25 @@ class TMap {
 
       // 订住按钮添加点击事件
       var nailDom = document.getElementById('nailBtn')
-      if (nailDom && that.videoPath) {
+      if (nailDom) {
         nailDom.addEventListener('click', function () {
-          that.vm.nailVideo(that.videoPath)
+          if(that.currentMediaType === 'video' && that.videoPath){
+            that.vm.nailVideo(that.videoPath)
+          }else if(that.currentMediaType === 'img' && that.imgPath){
+            that.vm.nailImg(that.imgPath)
+          }
         })
       }
 
       // 缩放按钮添加点击事件
       var zoomDom = document.getElementById('zoomBtn')
-      if (zoomDom && that.videoPath) {
+      if (zoomDom) {
         zoomDom.addEventListener('click', function () {
-          that.vm.zoomVideo(that.videoPath)
+          if(that.currentMediaType === 'video' && that.videoPath){
+            that.vm.zoomVideo(that.videoPath)
+          }else if(that.currentMediaType === 'img' && that.imgPath){
+            that.vm.zoomImg(that.imgPath)
+          }
         })
       }
     })

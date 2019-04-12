@@ -1,19 +1,39 @@
 <template>
   <div class="a-pic">
-    <div class="max-video"
-         v-for="(item,index) in maxVideoMap"
-         :key="index">
-      <div style="margin:0 auto;width: 1280px;">
-        <div style="text-align:right;">
-          <img v-if="item.url"
-               :src="closeIcon"
-               @click="closeMaxVideo(index)">
+    <div v-if="maxVideoMap&&maxVideoMap[0]&&maxVideoMap[0].url">
+      <div class="max-media"
+           v-for="(item,index) in maxVideoMap"
+           :key="index">
+        <div class="media-container">
+          <div class="media-wrap">
+            <div class="media-close">
+              <img v-if="item.url"
+                   :src="closeIcon"
+                   @click="closeMaxVideo(index)">
+            </div>
+            <video controls="controls"
+                   autoplay
+                   v-if="item.url"
+                   :src="item.url"></video>
+          </div>
         </div>
-        <video style="width:inhert;height:inhert;"
-               controls="controls"
-               autoplay
-               v-if="item.url"
-               :src="item.url"></video>
+      </div>
+    </div>
+    <div v-if="maxImgMap&&maxImgMap[0]&&maxImgMap[0].url">
+      <div class="max-media"
+           v-for="(item,index) in maxImgMap"
+           :key="index">
+        <div class="media-container">
+          <div class="media-wrap">
+            <div class="media-close">
+              <img v-if="item.url"
+                   :src="closeIcon"
+                   @click="closeMaxImg(index)">
+            </div>
+            <img v-if="item.url"
+                 :src="item.url">
+          </div>
+        </div>
       </div>
     </div>
     <div :class="hideLeftPanel?'panel-l panel-l-hidden':'panel-l'">
@@ -35,7 +55,7 @@
         <el-col :span="19"
                 class="collapse-col">
           <div v-if="moduleMap[0].actived">
-            <el-collapse v-model="monitorActiveNames"
+            <el-collapse v-model="jobActiveNames"
                          @change="handleChange">
               <el-collapse-item title="水利基础"
                                 name="1">
@@ -337,7 +357,19 @@ export default {
         }
       ],
 
-      jobActiveNames: ['1'],
+      imgMap: [
+        {
+          url: ''
+        }
+      ],
+
+      maxImgMap: [
+        {
+          url: ''
+        }
+      ],
+
+      jobActiveNames: ['1', '2', '3', '4', '5'],
       monitorActiveNames: ['1'],
       specialActiveNames: ['1'],
       statisticsActiveNames: ['1'],
@@ -509,7 +541,8 @@ export default {
           '3': 'djbasin'
         },
         public: {
-          '1': 'public'
+          '1': 'public',
+          '2': 'public2'
         }
       },
       // 水利基础配置项映射
@@ -583,6 +616,12 @@ export default {
     },
     closeMaxVideo () {
       this.maxVideoMap[0].url = ''
+    },
+    closeImg (index) {
+      this.imgMap.splice(index, 1)
+    },
+    closeMaxImg () {
+      this.maxImgMap[0].url = ''
     },
     handleTogglePanel (type) {
       if (type === 'left') {
@@ -871,8 +910,9 @@ export default {
           // 传递订住视频的方法
           that.tMap.nailVideoFun = this.nailVideo
           that.tMap.zoomVideoFun = this.zoomVideo
+
           // 添加覆盖物并返回覆盖物
-          var overlay = that.tMap.addMarker(point, item, iconUrl, this.nailVideo)
+          var overlay = that.tMap.addMarker(point, item, iconUrl)
 
           // 将水利基础覆盖物保存起来
           if (!that.tMap.jobVideoOverLays) {
@@ -885,18 +925,35 @@ export default {
     },
 
     // 订住视频
-    nailVideo (videoUrl) {
+    nailVideo (url) {
       var item = {
-        url: videoUrl
+        url: url
       }
       this.videoMap.push(item)
     },
 
-    zoomVideo (videoUrl) {
+    // 最大化视频
+    zoomVideo (url) {
       var item = {
-        url: videoUrl
+        url: url
       }
       this.maxVideoMap[0] = Object.assign(this.maxVideoMap[0], item)
+    },
+
+    // 订住图片
+    nailImg (url) {
+      var item = {
+        url: url
+      }
+      this.imgMap.push(item)
+    },
+
+    // 最大化图片
+    zoomImg (url) {
+      var item = {
+        url: url
+      }
+      this.maxImgMap[0] = Object.assign(this.maxImgMap[0], item)
     },
 
     // 获取水务监测站数据
@@ -912,17 +969,26 @@ export default {
         }
         delete that.tMap.jobPublicOverLays
       }
-      job['getPublicList'](that.jobPublicParam).then(response => {
+      job['getPublicityList'](that.jobPublicParam).then(response => {
         that.jobPublicList = response.data;
 
         // 设置模块名称，用于区分窗口属性映射关系keyMap的设置
         that.tMap.moduleType = 'public'
+
         for (var i = 0; i < that.jobPublicList.length; i++) {
           var item = that.jobPublicList[i]
           var lnglat = item.lnglat
           // 构建坐标点列表
+
           var point = that.tMap.buildPoint(lnglat)
-          var iconUrl = that.getIconBytype(that.tMap.moduleType, item.type)
+
+          // 通过判断实牌或者虚牌来获取不同的图标
+          var publicType = item.isReal === '1' ? 1 : '2'
+          var iconUrl = that.getIconBytype(that.tMap.moduleType, publicType)
+
+          // 传递订住视频的方法
+          that.tMap.nailImgFun = this.nailImg
+          that.tMap.zoomImgFun = this.zoomImg
 
           // 添加覆盖物并返回覆盖物
           var overlay = that.tMap.addMarker(point, item, iconUrl)
@@ -1078,7 +1144,7 @@ export default {
 </script>
 <style lang="scss">
 .a-pic {
-  .max-video {
+  .max-media {
     overflow: hidden;
     z-index: 1001;
     position: absolute;
@@ -1087,8 +1153,39 @@ export default {
     bottom: 0;
     right: 0;
     margin: auto;
-    width: auto;
+    // width: auto;
     height: auto;
+    max-width: 1366px;
+    // max-height: 768px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .media-container {
+      margin: 0 auto;
+      text-align: center;
+      .media-wrap {
+        position: relative;
+        .media-close {
+          text-align: right;
+          position: absolute;
+          right: 0;
+          top: 0;
+          z-index: 10;
+          img {
+            width: 50px;
+            height: 50px;
+          }
+        }
+        video {
+          height: inherit;
+          width: inherit;
+        }
+        img {
+          height: inherit;
+          width: inherit;
+        }
+      }
+    }
   }
 
   #mapDiv {

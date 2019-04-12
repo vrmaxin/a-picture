@@ -35,5 +35,12 @@ export default {
       method: 'post',
       data
     })
+  },
+  getPublicityList(data) {
+    return request({
+      url: '/job/publicity/list',
+      method: 'post',
+      data
+    })
   }
 }
