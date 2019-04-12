@@ -167,16 +167,16 @@ class TMap {
             var nailImgPath = require(`@/assets/global/nail.png`)
             // 暂时隐藏视频
             // html += `<div><video style="width:300px;height:150px;" controls="controls" autoplay src=${videoPath}></video></div>`
-            html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><img style="cursor:pointer;" title="videoPath" id="zoomBtn" src=${zoomImgPath}><img style="cursor:pointer;" title="videoPath" id="nailBtn" src=${nailImgPath}></div></div>`
+            // html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><img style="cursor:pointer;" title="videoPath" id="zoomBtn" src=${zoomImgPath}><img style="cursor:pointer;" title="videoPath" id="nailBtn" src=${nailImgPath}></div></div>`
+            
+            html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><span style="cursor:pointer;text-decoration:underline;" title="videoPath" id="zoomBtn">查看</span></div></div>`
           } else if(key === 'imgUrl'){
             this.currentMediaType = 'img'
             this.imgPath = require(`@/static/${val}`)
             var imgPath = require(`@/static/${val}`)
-            var zoomImgPath = require(`@/assets/global/zoom.png`)
-            var nailImgPath = require(`@/assets/global/nail.png`)
-            html += `<div><img style="width:300px;height:150px;" controls="controls" autoplay src=${imgPath}></img></div>`
+            // html += `<div><img style="width:300px;height:150px;" controls="controls" autoplay src=${imgPath}></img></div>`
 
-            html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><img style="cursor:pointer;" title="videoPath" id="zoomBtn" src=${zoomImgPath}><img style="cursor:pointer;" title="videoPath" id="nailBtn" src=${nailImgPath}></div></div>`
+            html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><span style="cursor:pointer;text-decoration:underline;" title="videoPath" id="zoomBtn">查看</span></div></div>`
           } else {
             html += `<div><strong>${keyMap[key]}:</strong><span>${val}</span></div>`
           }
