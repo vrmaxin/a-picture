@@ -212,7 +212,8 @@
         </el-col>
         <el-col class="table-col"
                 :span="5">
-          <el-table :data="jobBasicList"
+          <el-table @row-click="handleClickRow"
+                    :data="jobBasicList"
                     stripe
                     border
                     size="small"
@@ -527,6 +528,13 @@ export default {
             opacity: 1,
             lineStyle: 'dashed'
           }
+        },
+        '5': {
+          options: {
+            color: "#00FF00",
+            opacity: 0.5,
+            weight: 10
+          }
         }
       }
     }
@@ -542,6 +550,13 @@ export default {
     this.initMap()
   },
   methods: {
+    handleClickRow (row, column, event) {
+      debugger
+      var lnglat = row.lnglat ? row.lnglat : row.lnglatList[0]
+      var lng = lnglat.split(',')[0]
+      var lat = lnglat.split(',')[1]
+      this.tMap.centerAndZoom(lng, lat)
+    },
     closeVideo (index) {
       this.videoMap.splice(index, 1)
     },
@@ -689,14 +704,8 @@ export default {
           // 构建坐标点列表
           var points = that.tMap.buildPoints(lnglatList)
 
-          var options = {
-            color: "green",
-            weight: 2,
-            opacity: 0.5,
-            fillColor: "#FFFFFF",
-            fillOpacity: 0.5
-          }
-
+          var option = this.getOptionBytype('5')
+          var options = option && option.options ? option.options : {}
           // 添加覆盖物并返回覆盖物
           var overlay = that.tMap.addPolyline(points, item, options)
 
@@ -718,7 +727,7 @@ export default {
         var overLays = that.tMap.jobProjectOverLays
         for (var i = 0; i < overLays.length; i++) {
           var overlay = overLays[i]
-          // that.tMap.removeOverLay(overlay)
+          that.tMap.removeOverLay(overlay)
         }
         delete that.tMap.jobProjectOverLays
       }
