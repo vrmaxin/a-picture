@@ -1,5 +1,9 @@
 <template>
   <div class="a-pic">
+    <img class="map-reset"
+         :src="resetMap.icon"
+         @click="resetMap.handle()"
+         alt="">
     <div class="toolbar-wrap">
       <div class="toolbar">
         <div v-for="(item,index) in toolbarMap"
@@ -303,7 +307,6 @@ export default {
   name: 'Apic',
   data () {
     return {
-
       closeIcon: require('@/assets/global/close.png'),
       hideLeftPanel: false,
       hideRightPanel: false,
@@ -665,7 +668,11 @@ export default {
           actived: false,
           handle: this.handleToolClear
         }
-      ]
+      ],
+      resetMap: {
+        icon: require('@/assets/map/tool/reset.png'),
+        handle: this.handleResetMap
+      }
     }
   },
   watch: {},
@@ -679,6 +686,9 @@ export default {
     this.initMap()
   },
   methods: {
+    handleResetMap () {
+      this.tMap.reset()
+    },
     handleTool (type) {
       var that = this
       that.tMap.addTool(type, that.tMap.map)
@@ -1256,6 +1266,13 @@ export default {
 </script>
 <style lang="scss">
 .a-pic {
+  .map-reset {
+    position: absolute;
+    right: 370px;
+    top: 45px;
+    z-index: 1001;
+    cursor: pointer;
+  }
   .toolbar-wrap {
     z-index: 1000;
     .toolbar {

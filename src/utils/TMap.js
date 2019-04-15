@@ -20,6 +20,15 @@ class TMap {
     map = this.map
 
     map.addEventListener("zoomend", this.mapZoomend);
+    map.addEventListener("addoverlay", this.mapAddoverlay);
+  }
+
+  mapAddoverlay(type, target, addoverlay){
+    debugger
+  }
+
+  reset(){
+    this.centerAndZoom(this.lng,this.lat,this.zoom)
   }
 
   mapZoomend(type, target) {
@@ -75,6 +84,7 @@ class TMap {
     //创建标注对象
     marker = new T.Marker(point, options);
 
+    debugger
     // 添加标注点击事件
     var that = this
     marker.addEventListener("click", function (e) {
