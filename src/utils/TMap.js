@@ -256,6 +256,83 @@ class TMap {
       this.addInfoWindow(lng, lat, data)
     }
   }
+
+  addMapControl(arr){
+    if(arr.indexOf('mapType')!==-1){
+      //创建对象
+      var ctrl = new T.Control.MapType();
+      //添加控件
+      map.addControl(ctrl);
+    }
+    if(arr.indexOf('zoom')!==-1){
+     //创建缩放平移控件对象
+     var control = new T.Control.Zoom();
+     //添加缩放平移控件
+     map.addControl(control);
+    }
+
+    if(arr.indexOf('scale')!==-1){
+      //创建比例尺控件对象
+      var scale = new T.Control.Scale();
+      //添加比例尺控件
+      map.addControl(scale);
+    }
+  }
+
+
+  addTool(type,map){
+    if (this.toolHandler) {
+      this.toolHandler.close();
+    }
+
+    if(!this.toolHandlerArr){
+      this.toolHandlerArr = []
+    }
+
+    if(type==='marker'){
+      // 创建标注工具对象
+      var markerTool = new T.MarkTool(this.map, {follow: true});
+      this.toolHandler = markerTool
+    }else if(type==='polyline'){
+      // //创建画线工具对象
+      var lineTool =  new T.PolylineTool(this.map, {showLabel:false});
+      this.toolHandler = lineTool
+    }else if(type==='polygon'){
+      //创建画线工具对象
+      var polygonTool = new T.PolygonTool(this.map);
+      this.toolHandler = polygonTool
+    }else if(type==='rect'){
+      // 创建矩形工具对象
+      var rectTool = new T.RectangleTool(this.map);
+      this.toolHandler = rectTool
+    }else if(type==='circle'){
+      //创建画圆工具对象
+      var circleTool = new T.CircleTool(this.map);
+      this.toolHandler = circleTool
+    }else if(type==='rangingline'){
+      //创建画线工具对象
+      var lineTool = new T.PolylineTool(this.map, {showLabel:true});
+      this.toolHandler = lineTool
+    }else if(type==='ranginggon'){
+      //创建多边形工具对象
+      var polygonTool = new T.PolygonTool(this.map, {showLabel:true});
+      this.toolHandler = polygonTool
+    }
+
+    this.toolHandlerArr.push(this.toolHandler)
+
+    this.toolHandler.open()
+  }
+
+  clearTool(){
+    if(this.toolHandlerArr){
+      for(var i in this.toolHandlerArr){
+        var item = this.toolHandlerArr[i]
+        item.clear()
+      }
+    }
+  }
+  
 }
 export {
   TMap

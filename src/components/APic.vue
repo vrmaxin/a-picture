@@ -1,5 +1,20 @@
 <template>
   <div class="a-pic">
+    <div class="toolbar-wrap">
+      <div class="toolbar">
+        <div v-for="(item,index) in toolbarMap"
+             :key="index"
+             :class="item.actived?'tool actived':'tool'"
+             @click="handleClickToolMapLabel(item,index)"
+             @mouseover="handleMouseOverToolMapLabel(item,index)"
+             @mouseout="handleMouseOutToolMapLabel(item,index)">
+          <img :src="item.actived?item.activedIcon:item.icon"
+               alt="">
+          <i v-if="!item.actived&&index!==toolbarMap.length-1">|</i>
+          <span>{{item.label}}</span>
+        </div>
+      </div>
+    </div>
     <div v-if="maxVideoMap&&maxVideoMap[0]&&maxVideoMap[0].url">
       <div class="max-media"
            v-for="(item,index) in maxVideoMap"
@@ -55,8 +70,7 @@
         <el-col :span="19"
                 class="collapse-col">
           <div v-if="moduleMap[0].actived">
-            <el-collapse v-model="jobActiveNames"
-                         @change="handleChange">
+            <el-collapse v-model="jobActiveNames">
               <el-collapse-item title="水利基础"
                                 name="1">
                 <el-checkbox :indeterminate="jobBasicIsIndeterminate"
@@ -151,8 +165,7 @@
             </el-collapse>
           </div>
           <div v-if="moduleMap[1].actived">
-            <el-collapse v-model="jobActiveNames"
-                         @change="handleChange">
+            <el-collapse v-model="jobActiveNames">
               <el-collapse-item title="监测监控"
                                 name="1">
                 <el-checkbox :indeterminate="jobBasicIsIndeterminate"
@@ -172,8 +185,7 @@
             </el-collapse>
           </div>
           <div v-if="moduleMap[2].actived">
-            <el-collapse v-model="jobActiveNames"
-                         @change="handleChange">
+            <el-collapse v-model="jobActiveNames">
               <el-collapse-item title="河长制专题"
                                 name="1">
                 <el-checkbox :indeterminate="jobBasicIsIndeterminate"
@@ -193,8 +205,7 @@
             </el-collapse>
           </div>
           <div v-if="moduleMap[3].actived">
-            <el-collapse v-model="jobActiveNames"
-                         @change="handleChange">
+            <el-collapse v-model="jobActiveNames">
               <el-collapse-item title="统计分析"
                                 name="1">
                 <el-checkbox :indeterminate="jobBasicIsIndeterminate"
@@ -288,8 +299,6 @@
 <script>
 import job from '@/api/job.js'
 import { TMap } from '@/utils/TMap.js'
-import { debug, debuglog } from 'util';
-import { decode } from 'punycode';
 export default {
   name: 'Apic',
   data () {
@@ -591,7 +600,72 @@ export default {
             weight: 10
           }
         }
-      }
+      },
+      toolbarMap: [
+        {
+          label: '点',
+          icon: require('@/assets/map/tool/marker.png'),
+          activedIcon: require('@/assets/map/tool/marker_actived.png'),
+          actived: false,
+          type: 'marker',
+          handle: this.handleTool
+        },
+        {
+          label: '线',
+          icon: require('@/assets/map/tool/polyline.png'),
+          activedIcon: require('@/assets/map/tool/polyline_actived.png'),
+          actived: false,
+          type: 'polyline',
+          handle: this.handleTool
+        },
+        {
+          label: '面',
+          icon: require('@/assets/map/tool/polygon.png'),
+          activedIcon: require('@/assets/map/tool/polygon_actived.png'),
+          actived: false,
+          type: 'polygon',
+          handle: this.handleTool
+        },
+        {
+          label: '矩形',
+          icon: require('@/assets/map/tool/rect.png'),
+          activedIcon: require('@/assets/map/tool/rect_actived.png'),
+          actived: false,
+          type: 'rect',
+          handle: this.handleTool
+        },
+        {
+          label: '圆',
+          icon: require('@/assets/map/tool/circle.png'),
+          activedIcon: require('@/assets/map/tool/circle_actived.png'),
+          actived: false,
+          type: 'circle',
+          handle: this.handleTool
+        },
+        {
+          label: '测距',
+          icon: require('@/assets/map/tool/rangingline.png'),
+          activedIcon: require('@/assets/map/tool/rangingline_actived.png'),
+          actived: false,
+          type: 'rangingline',
+          handle: this.handleTool
+        },
+        {
+          label: '测面',
+          icon: require('@/assets/map/tool/ranginggon.png'),
+          activedIcon: require('@/assets/map/tool/ranginggon_actived.png'),
+          actived: false,
+          type: 'ranginggon',
+          handle: this.handleTool
+        },
+        {
+          label: '清除',
+          icon: require('@/assets/map/tool/clear.png'),
+          activedIcon: require('@/assets/map/tool/clear_actived.png'),
+          actived: false,
+          handle: this.handleToolClear
+        }
+      ]
     }
   },
   watch: {},
@@ -605,7 +679,20 @@ export default {
     this.initMap()
   },
   methods: {
-    handleClickRow (row, column, event) {
+    handleTool (type) {
+      var that = this
+      that.tMap.addTool(type, that.tMap.map)
+
+      // 天地图绘制线的时候会获取window全局下的map，因此map赋给window
+      window.map = that.tMap.map
+    },
+
+    handleToolClear () {
+      var that = this
+      that.tMap.clearTool()
+    },
+
+    handleClickRow (row) {
       var lnglat = row.lnglat ? row.lnglat : row.lnglatList[0]
       var lng = lnglat.split(',')[0]
       var lat = lnglat.split(',')[1]
@@ -634,10 +721,7 @@ export default {
     initMap () {
       this.tMap = new TMap('mapDiv', T)
       this.tMap.vm = this
-    },
-
-    handleChange (val) {
-      console.log(val);
+      this.tMap.addMapControl(['mapType', 'zoom', 'scale'])
     },
 
     // 模块标签改变事件
@@ -652,8 +736,7 @@ export default {
 
     // 模块标签改变事件
     handleMouseOverModuleMapLabel (item, index) {
-      if (this.moduleMap[index].actived) {
-      } else {
+      if (!this.moduleMap[index].actived) {
         this.labelHoverTip = true
         this.moduleMap[index].actived = true
       }
@@ -679,8 +762,7 @@ export default {
 
     // 模块标签改变事件
     handleMouseOverTypeMapLabel (item, index) {
-      if (this.typeMap[index].actived) {
-      } else {
+      if (!this.typeMap[index].actived) {
         this.labelHoverTip = true
         this.typeMap[index].actived = true
       }
@@ -690,6 +772,35 @@ export default {
     handleMouseOutTypeMapLabel (item, index) {
       if (this.labelHoverTip) {
         this.typeMap[index].actived = false
+      }
+      this.labelHoverTip = false
+    },
+
+    // 模块标签改变事件
+    handleClickToolMapLabel (item, index) {
+      for (var i in this.toolbarMap) {
+        var tempItem = this.toolbarMap[i]
+        tempItem.actived = false
+      }
+      this.toolbarMap[index].actived = true
+      this.labelHoverTip = false
+
+      // 执行地图工具方法
+      item.handle(item.type)
+    },
+
+    // 模块标签改变事件
+    handleMouseOverToolMapLabel (item, index) {
+      if (!this.toolbarMap[index].actived) {
+        this.labelHoverTip = true
+        this.toolbarMap[index].actived = true
+      }
+    },
+
+    // 模块标签改变事件
+    handleMouseOutToolMapLabel (item, index) {
+      if (this.labelHoverTip) {
+        this.toolbarMap[index].actived = false
       }
       this.labelHoverTip = false
     },
@@ -757,20 +868,21 @@ export default {
     getBasicRiverList () {
       var that = this
 
+      var overLays, overlay, i
       // 1.先清除现有的水利基础的覆盖物
       if (that.tMap.jobBasicRiverOverLays && that.tMap.jobBasicRiverOverLays.length) {
-        var overLays = that.tMap.jobBasicRiverOverLays
-        for (var i = 0; i < overLays.length; i++) {
-          var overlay = overLays[i]
+        overLays = that.tMap.jobBasicRiverOverLays
+        for (i = 0; i < overLays.length; i++) {
+          overlay = overLays[i]
           that.tMap.removeOverLay(overlay)
         }
         delete that.tMap.jobBasicRiverOverLays
       }
 
       if (that.tMap.jobBasicTopRiverOverLays && that.tMap.jobBasicTopRiverOverLays.length) {
-        var overlays = that.tMap.jobBasicTopRiverOverLays
-        for (var i in overlays) {
-          var overlay = overlays[i]
+        overLays = that.tMap.jobBasicTopRiverOverLays
+        for (i in overLays) {
+          overlay = overLays[i]
 
           // 如果是默认河流，则显示整条完整河流
           if (this.jobBasicRiverParam.type === '0') {
@@ -788,7 +900,7 @@ export default {
         that.basicRiverList = response.data;
         for (var i = 0; i < that.basicRiverList.length; i++) {
           var item = that.basicRiverList[i]
-          var type = item.type
+          // var type = item.type
           var lnglatList = item.lnglatList
           // 构建坐标点列表
           var points = that.tMap.buildPoints(lnglatList)
@@ -878,7 +990,7 @@ export default {
           }
           that.tMap.jobMonitorOverLays.push(overlay)
         }
-        console.log(response.data);
+        // console.log(response.data);
       })
     },
 
@@ -920,7 +1032,7 @@ export default {
           }
           that.tMap.jobVideoOverLays.push(overlay)
         }
-        console.log(response.data);
+        // console.log(response.data);
       })
     },
 
@@ -999,7 +1111,7 @@ export default {
           }
           that.tMap.jobPublicOverLays.push(overlay)
         }
-        console.log(response.data);
+        // console.log(response.data);
       })
     },
 
@@ -1144,6 +1256,85 @@ export default {
 </script>
 <style lang="scss">
 .a-pic {
+  .toolbar-wrap {
+    z-index: 1000;
+    .toolbar {
+      position: absolute;
+      right: 400px;
+      top: 30px;
+      width: auto;
+      height: auto;
+      z-index: 1000;
+
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      align-content: center;
+      background: #ffffff;
+      box-shadow: 0 0 5px 3px #cccccc;
+      border-radius: 2px;
+      .tool:hover {
+        background: #2380e8;
+        color: #ffffff;
+      }
+      .tool.actived {
+        color: #ffffff;
+        background: #2380e8;
+        border-radius: 2px;
+      }
+
+      // .tool::after {
+      //   content: "|";
+      //   display: table-cell;
+      //   vertical-align: middle;
+      //   position: absolute;
+      //   right: 0;
+      //   top: center;
+      //   color: #cccccc;
+      // }
+
+      .tool i {
+        font-style: normal;
+        display: table-cell;
+        vertical-align: middle;
+        position: absolute;
+        right: -2px;
+        top: 15px;
+        color: #cccccc;
+      }
+
+      .tool {
+        order: 1;
+        flex-grow: 0;
+        flex-shrink: 1;
+        flex-basis: auto;
+        flex: 0 1 auto;
+        align-self: auto;
+
+        text-align: center;
+
+        display: table;
+        padding: 15px 15px;
+
+        position: relative;
+
+        cursor: pointer;
+        img {
+          display: table-cell;
+          vertical-align: middle;
+          margin-right: 5px;
+        }
+
+        span {
+          display: table-cell;
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+
   .max-media {
     overflow: hidden;
     z-index: 1001;
