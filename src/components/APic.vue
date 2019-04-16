@@ -55,6 +55,23 @@
         </div>
       </div>
     </div>
+    <div v-if="maxChartsMap&&maxChartsMap[0]&&maxChartsMap[0].url">
+      <div class="max-media"
+           v-for="(item,index) in maxChartsMap"
+           :key="index">
+        <div class="media-container">
+          <div class="media-wrap">
+            <div class="media-close">
+              <img v-if="item.url"
+                   :src="closeIcon"
+                   @click="closeMaxCharts(index)">
+            </div>
+            <img v-if="item.url"
+                 :src="item.url">
+          </div>
+        </div>
+      </div>
+    </div>
     <div :class="hideLeftPanel?'panel-l panel-l-hidden':'panel-l'">
       <el-row :class="hideLeftPanel?'panel-hidden':''">
         <el-col class="label-col"
@@ -62,11 +79,11 @@
           <div class="label-wrap">
             <div v-for="(item,index) in moduleMap"
                  :key="index"
-                 :class="item.actived?'label-item actived':'label-item'"
+                 :class="item.actived||item.hovered?'label-item actived':'label-item'"
                  @click="handleClickModuleMapLabel(item,index)"
                  @mouseover="handleMouseOverModuleMapLabel(item,index)"
                  @mouseout="handleMouseOutModuleMapLabel(item,index)">
-              <img :src="item.actived?item.activedIcon:item.icon" />
+              <img :src="item.actived||item.hovered?item.activedIcon:item.icon" />
               {{item.label}}
             </div>
           </div>
@@ -168,25 +185,8 @@
               </el-collapse-item>
             </el-collapse>
           </div>
-          <div v-if="moduleMap[1].actived">
-            <el-collapse v-model="jobActiveNames">
-              <el-collapse-item title="监测监控"
-                                name="1">
-                <el-checkbox :indeterminate="jobBasicIsIndeterminate"
-                             v-model="jobBasicAllSelected"
-                             @change="handleJobBasicAllChange"
-                             size="small"
-                             border>全选</el-checkbox>
-                <el-checkbox-group v-model="jobBasicSelected"
-                                   @change="handleJobBasicChange"
-                                   size="small">
-                  <el-checkbox v-for="(item,index) in jobBasicOptions"
-                               :label="item.value"
-                               :key="index"
-                               border>{{item.label}}</el-checkbox>
-                </el-checkbox-group>
-              </el-collapse-item>
-            </el-collapse>
+          <div v-show="moduleMap[1].actived">
+            <Monitor :tMap="tMap"></Monitor>
           </div>
           <div v-if="moduleMap[2].actived">
             <el-collapse v-model="jobActiveNames">
@@ -303,36 +303,51 @@
 <script>
 import job from '@/api/job.js'
 import { TMap } from '@/utils/TMap.js'
+import Monitor from './lib/Monitor'
 export default {
   name: 'Apic',
+  components: {
+    Monitor
+  },
+  watch: {
+  },
   data () {
     return {
+
       closeIcon: require('@/assets/global/close.png'),
       hideLeftPanel: false,
       hideRightPanel: false,
       moduleMap: [
         {
+          name: 'job',
           label: '工程设施',
           icon: require('@/assets/job.png'),
           activedIcon: require('@/assets/job_actived.png'),
+          hovered: false,
           actived: true
         },
         {
+          name: 'monitor',
           label: '监测监控',
           icon: require('@/assets/monitor.png'),
           activedIcon: require('@/assets/monitor_actived.png'),
+          hovered: false,
           actived: false
         },
         {
+          name: 'special',
           label: '河长制专题',
           icon: require('@/assets/special.png'),
           activedIcon: require('@/assets/special_actived.png'),
+          hovered: false,
           actived: false
         },
         {
+          name: 'statistics',
           label: '统计分析',
           icon: require('@/assets/statistics.png'),
           activedIcon: require('@/assets/statistics_actived.png'),
+          hovered: false,
           actived: false
         }
       ],
@@ -376,6 +391,18 @@ export default {
       ],
 
       maxImgMap: [
+        {
+          url: ''
+        }
+      ],
+
+      chartsMap: [
+        {
+          url: ''
+        }
+      ],
+
+      maxChartsMap: [
         {
           url: ''
         }
@@ -543,9 +570,7 @@ export default {
           '2': 'rain',
           '3': 'quality',
           '4': 'section',
-          '5': 'power',
-          '6': 'camera',
-          '7': 'bulletin'
+          '5': 'power'
         },
         video: {
           '1': 'hydrology',
@@ -675,7 +700,6 @@ export default {
       }
     }
   },
-  watch: {},
   computed: {
     // 是否显示河流分级
     isRiver () {
@@ -720,6 +744,12 @@ export default {
     closeMaxImg () {
       this.maxImgMap[0].url = ''
     },
+    closeCharts (index) {
+      this.chartsMap.splice(index, 1)
+    },
+    closeMaxCharts () {
+      this.maxChartsMap[0].url = ''
+    },
     handleTogglePanel (type) {
       if (type === 'left') {
         this.hideLeftPanel = !this.hideLeftPanel
@@ -738,8 +768,31 @@ export default {
     handleClickModuleMapLabel (item, index) {
       for (var i in this.moduleMap) {
         var tempItem = this.moduleMap[i]
+
+        if (tempItem.actived) {
+          if (i !== index) {
+            // 创建一个数组，用于存放旧的顶级模块的地图覆盖物
+            this.tMap[tempItem.name + 'AllOverlays'] = this.tMap.getAllOverlays()
+            this.tMap.clearOverLays()
+          }
+        }
+
         tempItem.actived = false
+        tempItem.hovered = false
       }
+
+      // 如果存在已有的覆盖物，则加载出原有的覆盖物
+      var name = this.moduleMap[index].name
+
+      // 重新设置顶级模块名，用于标注点点击弹窗正确获取映射的中文属性名称
+      this.tMap.topModuleType = name
+      if (this.tMap[name + 'AllOverlays'] && this.tMap[name + 'AllOverlays'].length) {
+        for (var j in this.tMap[name + 'AllOverlays']) {
+          var overlay = this.tMap[name + 'AllOverlays'][j]
+          this.tMap.map.addOverLay(overlay)
+        }
+      }
+
       this.moduleMap[index].actived = true
       this.labelHoverTip = false
     },
@@ -748,14 +801,16 @@ export default {
     handleMouseOverModuleMapLabel (item, index) {
       if (!this.moduleMap[index].actived) {
         this.labelHoverTip = true
-        this.moduleMap[index].actived = true
+        // this.moduleMap[index].actived = true
+        this.moduleMap[index].hovered = true
       }
     },
 
     // 模块标签改变事件
     handleMouseOutModuleMapLabel (item, index) {
       if (this.labelHoverTip) {
-        this.moduleMap[index].actived = false
+        // this.moduleMap[index].actived = false
+        this.moduleMap[index].hovered = false
       }
       this.labelHoverTip = false
     },
@@ -834,12 +889,16 @@ export default {
         that.jobBasicList = response.data;
 
         // 设置模块名称，用于区分窗口属性映射关系keyMap的设置
+        that.tMap.topModuleType = 'job'
         that.tMap.moduleType = 'basic'
 
         for (var i = 0; i < that.jobBasicList.length; i++) {
           var item = that.jobBasicList[i]
           var type = item.type
           var lnglatList = item.lnglatList
+
+          // 为标注点的属性添加模块的名称，用于弹窗获取映射中文属性名，修复切换顶级模块后（没有重新设置moduleType，导致模块名不对应），弹窗内容显示的问题
+          item.moduleType = 'basic'
 
           // 构建坐标点列表
           var points = that.tMap.buildPoints(lnglatList)
@@ -917,6 +976,10 @@ export default {
 
           var option = this.getOptionBytype('5')
           var options = option && option.options ? option.options : {}
+
+          // 为标注点的属性添加模块的名称，用于弹窗获取映射中文属性名，修复切换顶级模块后（没有重新设置moduleType，导致模块名不对应），弹窗内容显示的问题
+          item.moduleType = 'basic'
+
           // 添加覆盖物并返回覆盖物
           var overlay = that.tMap.addPolyline(points, item, options)
 
@@ -946,6 +1009,7 @@ export default {
         that.jobProjectList = response.data;
 
         // 设置模块名称，用于区分窗口属性映射关系keyMap的设置
+        that.tMap.topModuleType = 'job'
         that.tMap.moduleType = 'project'
         for (var i = 0; i < that.jobProjectList.length; i++) {
           var item = that.jobProjectList[i]
@@ -953,6 +1017,9 @@ export default {
           // 构建坐标点列表
           var point = that.tMap.buildPoint(lnglat)
           var iconUrl = that.getIconBytype(that.tMap.moduleType, item.type)
+
+          // 为标注点的属性添加模块的名称，用于弹窗获取映射中文属性名，修复切换顶级模块后（没有重新设置moduleType，导致模块名不对应），弹窗内容显示的问题
+          item.moduleType = 'project'
 
           // 添加覆盖物并返回覆盖物
           var overlay = that.tMap.addMarker(point, item, iconUrl)
@@ -983,6 +1050,8 @@ export default {
         that.jobMonitorList = response.data;
 
         // 设置模块名称，用于区分窗口属性映射关系keyMap的设置
+
+        that.tMap.topModuleType = 'job'
         that.tMap.moduleType = 'monitor'
         for (var i = 0; i < that.jobMonitorList.length; i++) {
           var item = that.jobMonitorList[i]
@@ -990,6 +1059,9 @@ export default {
           // 构建坐标点列表
           var point = that.tMap.buildPoint(lnglat)
           var iconUrl = that.getIconBytype(that.tMap.moduleType, item.type)
+
+          // 为标注点的属性添加模块的名称，用于弹窗获取映射中文属性名，修复切换顶级模块后（没有重新设置moduleType，导致模块名不对应），弹窗内容显示的问题
+          item.moduleType = 'monitor'
 
           // 添加覆盖物并返回覆盖物
           var overlay = that.tMap.addMarker(point, item, iconUrl)
@@ -1021,7 +1093,9 @@ export default {
         that.jobVideoList = response.data;
 
         // 设置模块名称，用于区分窗口属性映射关系keyMap的设置
+        that.tMap.topModuleType = 'job'
         that.tMap.moduleType = 'video'
+
         for (var i = 0; i < that.jobVideoList.length; i++) {
           var item = that.jobVideoList[i]
           var lnglat = item.lnglat
@@ -1032,6 +1106,9 @@ export default {
           // 传递订住视频的方法
           that.tMap.nailVideoFun = this.nailVideo
           that.tMap.zoomVideoFun = this.zoomVideo
+
+          // 为标注点的属性添加模块的名称，用于弹窗获取映射中文属性名，修复切换顶级模块后（没有重新设置moduleType，导致模块名不对应），弹窗内容显示的问题
+          item.moduleType = 'video'
 
           // 添加覆盖物并返回覆盖物
           var overlay = that.tMap.addMarker(point, item, iconUrl)
@@ -1078,6 +1155,18 @@ export default {
       this.maxImgMap[0] = Object.assign(this.maxImgMap[0], item)
     },
 
+    // 最大化图形
+    // 需要修改成echarts图形
+    zoomCharts (data) {
+
+      //测试用的图片
+      var item = {
+        url: require(`@/static/charts.png`)
+      }
+
+      this.maxChartsMap[0] = Object.assign(this.maxChartsMap[0], item)
+    },
+
     // 获取水务监测站数据
     getPublicList () {
       var that = this
@@ -1095,6 +1184,7 @@ export default {
         that.jobPublicList = response.data;
 
         // 设置模块名称，用于区分窗口属性映射关系keyMap的设置
+        that.tMap.topModuleType = 'job'
         that.tMap.moduleType = 'public'
 
         for (var i = 0; i < that.jobPublicList.length; i++) {
@@ -1111,6 +1201,9 @@ export default {
           // 传递订住视频的方法
           that.tMap.nailImgFun = this.nailImg
           that.tMap.zoomImgFun = this.zoomImg
+
+          // 为标注点的属性添加模块的名称，用于弹窗获取映射中文属性名，修复切换顶级模块后（没有重新设置moduleType，导致模块名不对应），弹窗内容显示的问题
+          item.moduleType = 'public'
 
           // 添加覆盖物并返回覆盖物
           var overlay = that.tMap.addMarker(point, item, iconUrl)
@@ -1477,6 +1570,7 @@ export default {
       .el-col.collapse-col {
         height: inherit;
         width: 346px;
+        overflow-y: auto;
         .el-collapse {
           .el-collapse-item {
             .el-collapse-item__header {

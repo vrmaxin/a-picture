@@ -23,12 +23,18 @@ class TMap {
     map.addEventListener("addoverlay", this.mapAddoverlay);
   }
 
-  mapAddoverlay(type, target, addoverlay){
-    debugger
+  mapAddoverlay(param) {
+    var type = param.type
+    var target = param.target
+    var addoverlay = param.addoverlay
   }
 
-  reset(){
-    this.centerAndZoom(this.lng,this.lat,this.zoom)
+  getAllOverlays() {
+    return map.getOverlays()
+  }
+
+  reset() {
+    this.centerAndZoom(this.lng, this.lat, this.zoom)
   }
 
   mapZoomend(type, target) {
@@ -74,7 +80,7 @@ class TMap {
     var options = {}
     if (iconUrl) {
       var icon = new T.Icon({
-        iconUrl: require(`@/assets/job/${this.moduleType}/${iconUrl}.png`)
+        iconUrl: require(`@/assets/${this.topModuleType}/${this.moduleType}/${iconUrl}.png`)
       });
       options = {
         icon: icon
@@ -84,7 +90,6 @@ class TMap {
     //创建标注对象
     marker = new T.Marker(point, options);
 
-    debugger
     // 添加标注点击事件
     var that = this
     marker.addEventListener("click", function (e) {
@@ -155,40 +160,55 @@ class TMap {
   // 构建弹窗内容
   buildInfoWinContent(data) {
     var html = ''
-    for (var key in data) {
-      var val = data[key]
-      var keyMap = getkeyMapByModuleType(this.moduleType)
-      if (keyMap && keyMap[key]) {
-        if (typeof val == "object" && Object.prototype.toString.call(val).toLowerCase() == "[object object]" && !val.length) {
-          var subKeyMap = keyMap[key]
-          var subData = val
-          for (var subKey in subData) {
-            var subVal = subData[subKey]
-            if (subKeyMap && subKeyMap[subKey]) {
-              html += `<div><strong>${subKeyMap[subKey]}:</strong><span>${subVal}</span></div>`
-            }
-          }
-        } else {
-          if (key === 'videoUrl') {
-            this.currentMediaType = 'video'
-            this.videoPath = require(`@/static/${val}`)
-            var videoPath = require(`@/static/${val}`)
-            var zoomImgPath = require(`@/assets/global/zoom.png`)
-            var nailImgPath = require(`@/assets/global/nail.png`)
-            // 暂时隐藏视频
-            // html += `<div><video style="width:300px;height:150px;" controls="controls" autoplay src=${videoPath}></video></div>`
-            // html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><img style="cursor:pointer;" title="videoPath" id="zoomBtn" src=${zoomImgPath}><img style="cursor:pointer;" title="videoPath" id="nailBtn" src=${nailImgPath}></div></div>`
-            
-            html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><span style="cursor:pointer;text-decoration:underline;" title="videoPath" id="zoomBtn">查看</span></div></div>`
-          } else if(key === 'imgUrl'){
-            this.currentMediaType = 'img'
-            this.imgPath = require(`@/static/${val}`)
-            var imgPath = require(`@/static/${val}`)
-            // html += `<div><img style="width:300px;height:150px;" controls="controls" autoplay src=${imgPath}></img></div>`
+    if (data.isVideo) {
+      var val = data.videoUrl
+      this.currentMediaType = 'video'
+      this.videoPath = require(`@/static/${val}`)
+      var videoPath = require(`@/static/${val}`)
+      var zoomImgPath = require(`@/assets/global/zoom.png`)
+      var nailImgPath = require(`@/assets/global/nail.png`)
+      // 暂时隐藏视频
+      html += `<div><video style="width:300px;height:150px;" controls="controls" autoplay src=${videoPath}></video></div>`
+      html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><img style="cursor:pointer;" title="videoPath" id="zoomBtn" src=${zoomImgPath}><img style="cursor:pointer;" title="videoPath" id="nailBtn" src=${nailImgPath}></div></div>`
+    } else {
 
-            html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><span style="cursor:pointer;text-decoration:underline;" title="videoPath" id="zoomBtn">查看</span></div></div>`
+      for (var key in data) {
+        var val = data[key]
+        // 使用data的moduleType属性获取模块类型
+        var keyMap = getkeyMapByModuleType(this.topModuleType, data.moduleType)
+        if (keyMap && keyMap[key]) {
+          if (typeof val == "object" && Object.prototype.toString.call(val).toLowerCase() == "[object object]" && !val.length) {
+            var subKeyMap = keyMap[key]
+            var subData = val
+            for (var subKey in subData) {
+              var subVal = subData[subKey]
+              if (subKeyMap && subKeyMap[subKey]) {
+                html += `<div><strong>${subKeyMap[subKey]}:</strong><span>${subVal}</span></div>`
+              }
+            }
           } else {
-            html += `<div><strong>${keyMap[key]}:</strong><span>${val}</span></div>`
+            if (key === 'videoUrl') {
+              this.currentMediaType = 'video'
+              this.videoPath = require(`@/static/${val}`)
+              var videoPath = require(`@/static/${val}`)
+              var zoomImgPath = require(`@/assets/global/zoom.png`)
+              var nailImgPath = require(`@/assets/global/nail.png`)
+              html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><span style="cursor:pointer;text-decoration:underline;" title="videoPath" id="zoomBtn">查看</span></div></div>`
+            } else if (key === 'imgUrl') {
+              this.currentMediaType = 'img'
+              this.imgPath = require(`@/static/${val}`)
+              var imgPath = require(`@/static/${val}`)
+              html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><span style="cursor:pointer;text-decoration:underline;" title="videoPath" id="zoomBtn">查看</span></div></div>`
+            } else if (key === 'widthCharts') {
+              this.currentMediaType = 'charts'
+
+              // 记录标注点的id，用于获取一周的数据，用于图形展示
+              this.dataForCharts = Object.assign({}, data)
+
+              html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><span style="cursor:pointer;text-decoration:underline;" title="videoPath" id="zoomBtn">趋势图</span></div></div>`
+            } else {
+              html += `<div><strong>${keyMap[key]}:</strong><span>${val}</span></div>`
+            }
           }
         }
       }
@@ -200,9 +220,9 @@ class TMap {
       var nailDom = document.getElementById('nailBtn')
       if (nailDom) {
         nailDom.addEventListener('click', function () {
-          if(that.currentMediaType === 'video' && that.videoPath){
+          if (that.currentMediaType === 'video' && that.videoPath) {
             that.vm.nailVideo(that.videoPath)
-          }else if(that.currentMediaType === 'img' && that.imgPath){
+          } else if (that.currentMediaType === 'img' && that.imgPath) {
             that.vm.nailImg(that.imgPath)
           }
         })
@@ -212,10 +232,12 @@ class TMap {
       var zoomDom = document.getElementById('zoomBtn')
       if (zoomDom) {
         zoomDom.addEventListener('click', function () {
-          if(that.currentMediaType === 'video' && that.videoPath){
+          if (that.currentMediaType === 'video' && that.videoPath) {
             that.vm.zoomVideo(that.videoPath)
-          }else if(that.currentMediaType === 'img' && that.imgPath){
+          } else if (that.currentMediaType === 'img' && that.imgPath) {
             that.vm.zoomImg(that.imgPath)
+          } else if (that.currentMediaType === 'charts' && that.dataForCharts) {
+            that.vm.zoomCharts(that.dataForCharts)
           }
         })
       }
@@ -267,21 +289,21 @@ class TMap {
     }
   }
 
-  addMapControl(arr){
-    if(arr.indexOf('mapType')!==-1){
+  addMapControl(arr) {
+    if (arr.indexOf('mapType') !== -1) {
       //创建对象
       var ctrl = new T.Control.MapType();
       //添加控件
       map.addControl(ctrl);
     }
-    if(arr.indexOf('zoom')!==-1){
-     //创建缩放平移控件对象
-     var control = new T.Control.Zoom();
-     //添加缩放平移控件
-     map.addControl(control);
+    if (arr.indexOf('zoom') !== -1) {
+      //创建缩放平移控件对象
+      var control = new T.Control.Zoom();
+      //添加缩放平移控件
+      map.addControl(control);
     }
 
-    if(arr.indexOf('scale')!==-1){
+    if (arr.indexOf('scale') !== -1) {
       //创建比例尺控件对象
       var scale = new T.Control.Scale();
       //添加比例尺控件
@@ -290,42 +312,50 @@ class TMap {
   }
 
 
-  addTool(type,map){
+  addTool(type, map) {
     if (this.toolHandler) {
       this.toolHandler.close();
     }
 
-    if(!this.toolHandlerArr){
+    if (!this.toolHandlerArr) {
       this.toolHandlerArr = []
     }
 
-    if(type==='marker'){
+    if (type === 'marker') {
       // 创建标注工具对象
-      var markerTool = new T.MarkTool(this.map, {follow: true});
+      var markerTool = new T.MarkTool(this.map, {
+        follow: true
+      });
       this.toolHandler = markerTool
-    }else if(type==='polyline'){
+    } else if (type === 'polyline') {
       // //创建画线工具对象
-      var lineTool =  new T.PolylineTool(this.map, {showLabel:false});
+      var lineTool = new T.PolylineTool(this.map, {
+        showLabel: false
+      });
       this.toolHandler = lineTool
-    }else if(type==='polygon'){
+    } else if (type === 'polygon') {
       //创建画线工具对象
       var polygonTool = new T.PolygonTool(this.map);
       this.toolHandler = polygonTool
-    }else if(type==='rect'){
+    } else if (type === 'rect') {
       // 创建矩形工具对象
       var rectTool = new T.RectangleTool(this.map);
       this.toolHandler = rectTool
-    }else if(type==='circle'){
+    } else if (type === 'circle') {
       //创建画圆工具对象
       var circleTool = new T.CircleTool(this.map);
       this.toolHandler = circleTool
-    }else if(type==='rangingline'){
+    } else if (type === 'rangingline') {
       //创建画线工具对象
-      var lineTool = new T.PolylineTool(this.map, {showLabel:true});
+      var lineTool = new T.PolylineTool(this.map, {
+        showLabel: true
+      });
       this.toolHandler = lineTool
-    }else if(type==='ranginggon'){
+    } else if (type === 'ranginggon') {
       //创建多边形工具对象
-      var polygonTool = new T.PolygonTool(this.map, {showLabel:true});
+      var polygonTool = new T.PolygonTool(this.map, {
+        showLabel: true
+      });
       this.toolHandler = polygonTool
     }
 
@@ -334,15 +364,15 @@ class TMap {
     this.toolHandler.open()
   }
 
-  clearTool(){
-    if(this.toolHandlerArr){
-      for(var i in this.toolHandlerArr){
+  clearTool() {
+    if (this.toolHandlerArr) {
+      for (var i in this.toolHandlerArr) {
         var item = this.toolHandlerArr[i]
         item.clear()
       }
     }
   }
-  
+
 }
 export {
   TMap

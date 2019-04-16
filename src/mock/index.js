@@ -26,8 +26,11 @@ Mock.mock(/\/job\/monitor\/list/, 'post', jobAPI.getMonitorList)
 Mock.mock(/\/job\/video\/list/, 'post', jobAPI.getVideoList)
 Mock.mock(/\/job\/publicity\/list/, 'post', jobAPI.getPublicityList)
 
-// 文章相关
-Mock.mock(/\/monitor\/list/, 'get', monitorAPI.getList)
+// 监测监控
+Mock.mock(/\/monitor\/quality\/list/, 'post', monitorAPI.getQualityList)
+Mock.mock(/\/monitor\/water\/list/, 'post', monitorAPI.getWaterList)
+Mock.mock(/\/monitor\/rain\/list/, 'post', monitorAPI.getRainList)
+Mock.mock(/\/monitor\/video\/list/, 'post', monitorAPI.getVideoList)
 
 // 搜索相关
 Mock.mock(/\/special\/user/, 'get', specialAPI.getList)
