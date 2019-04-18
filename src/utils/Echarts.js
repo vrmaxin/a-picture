@@ -1,4 +1,4 @@
-class Echarts {
+class ECharts {
   // 构造
   constructor(el) {
     this.chart = this.$echarts.init(document.getElementById(el))
@@ -27,5 +27,5 @@ class Echarts {
   }
 }
 export {
-  Echarts
+  ECharts
 };

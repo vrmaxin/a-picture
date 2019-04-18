@@ -11,7 +11,7 @@ var patrolData = [{
     problemNum: '3274',
     mileageDensity: '115',
     durationDensity: '8',
-    type: '1'
+    type: '1',
   },
   {
     id: "2",

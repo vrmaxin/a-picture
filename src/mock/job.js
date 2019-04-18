@@ -1764,7 +1764,6 @@ export default {
     var distData = []
     var data = JSON.parse(config.body)
     var types = data.types
-    debugger
     // 返回全部
     if (types && types.length && types[0] === '0') {
       return publicData

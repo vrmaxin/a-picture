@@ -43,7 +43,6 @@ class TMap {
   }
 
   mapZoomend(type, target) {
-    debugger
     this.zoom = map.getZoom()
     var overlays = map.getOverlays()
     for (var i in overlays) {

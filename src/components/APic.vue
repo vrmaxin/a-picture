@@ -1,8 +1,15 @@
 <template>
   <div class="a-pic">
+
+    <div id="chart"></div>
+
     <img class="map-reset"
          :src="resetMap.icon"
          @click="resetMap.handle()"
+         alt="">
+    <img class="map-cut"
+         :src="cutMap.icon"
+         @click="cutMap.handle()"
          alt="">
     <div class="toolbar-wrap">
       <div class="toolbar">
@@ -66,8 +73,9 @@
                    :src="closeIcon"
                    @click="closeMaxCharts(index)">
             </div>
-            <img v-if="item.url"
-                 :src="item.url">
+            <!-- <img v-if="item.url"
+                 :src="item.url"> -->
+            <!-- <div id="chart"></div> -->
           </div>
         </div>
       </div>
@@ -289,8 +297,10 @@
 <script>
 import job from '@/api/job.js'
 import { TMap } from '@/utils/TMap.js'
+import { ECharts } from '@/utils/ECharts.js'
 import Monitor from './lib/Monitor'
 import Statistics from './lib/Statistics'
+import { debug } from 'util';
 export default {
   name: 'Apic',
   components: {
@@ -363,6 +373,8 @@ export default {
 
       // 地图对象
       tMap: {},
+
+      eCharts: {},
 
       videoMap: [
         {
@@ -689,6 +701,10 @@ export default {
       resetMap: {
         icon: require('@/assets/map/tool/reset.png'),
         handle: this.handleResetMap
+      },
+      cutMap: {
+        icon: require('@/assets/map/tool/cut.png'),
+        handle: this.handleCutMap
       }
     }
   },
@@ -700,6 +716,7 @@ export default {
   },
   mounted () {
     this.initMap()
+    this.initCharts()
   },
   methods: {
     setStatisticsOption (lng, lat) {
@@ -715,7 +732,9 @@ export default {
         result.getMsg();
       }
     },
+    handleCutMap () {
 
+    },
     handleResetMap () {
       this.tMap.reset()
     },
@@ -769,6 +788,9 @@ export default {
       this.tMap.vm = this
       this.tMap.addMapControl(['mapType', 'zoom', 'scale'])
     },
+    initCharts () {
+      this.eCharts = new ECharts('chart')
+    },
 
     // 模块标签改变事件
     handleClickModuleMapLabel (item, index) {
@@ -794,9 +816,11 @@ export default {
         this.tMap.map.disableDrag()
         this.tMap.map.disableScrollWheelZoom()
         this.tMap.map.disableDoubleClickZoom()
-        
+
         if (this.statisticsOption.lng && this.statisticsOption.lat) {
           this.tMap.centerAndZoom(this.statisticsOption.lng, this.statisticsOption.lat, this.statisticsOption.zoom)
+        } else {
+          this.tMap.setZoom(this.statisticsOption.zoom)
         }
       } else {
         this.tMap.map.enableDrag()
@@ -1391,10 +1415,25 @@ export default {
 </script>
 <style lang="scss">
 .a-pic {
+  #chart {
+    position: absolute;
+    left: 400px;
+    top: 100px;
+    width: 400px;
+    height: 400px;
+    z-index: 1001;
+  }
   .map-reset {
     position: absolute;
     right: 370px;
     top: 45px;
+    z-index: 1001;
+    cursor: pointer;
+  }
+  .map-cut {
+    position: absolute;
+    right: 370px;
+    bottom: 45px;
     z-index: 1001;
     cursor: pointer;
   }

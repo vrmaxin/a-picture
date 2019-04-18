@@ -363,7 +363,7 @@ export default {
             var item = list[j]
             if (item.name === name) {
               itemData = Object.assign({}, item)
-              polygon.addEventListener("click", function (e) {
+              polygon.addEventListener("contextmenu", function (e) {
                 that.tMap.polyClickHandle(e, itemData)
               });
 
@@ -375,6 +375,10 @@ export default {
                 polygon.setFillColor(oldColor)
                 that.tMap.map.closeInfoWindow()
               })
+
+              polygon.addEventListener("click", function (e) {
+                alert("Asdads")
+              });
             }
           }
 
