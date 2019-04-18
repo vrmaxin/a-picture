@@ -23,6 +23,11 @@ class TMap {
     map.addEventListener("addoverlay", this.mapAddoverlay);
   }
 
+  setViewport(pointsArr) {
+    //显示最佳比例尺
+    map.setViewport(pointsArr);
+  }
+
   mapAddoverlay(param) {
     var type = param.type
     var target = param.target
@@ -38,6 +43,7 @@ class TMap {
   }
 
   mapZoomend(type, target) {
+    debugger
     this.zoom = map.getZoom()
     var overlays = map.getOverlays()
     for (var i in overlays) {

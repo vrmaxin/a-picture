@@ -142,5 +142,22 @@ var keyMap = {
       isVideo: true,
       videoUrl: true
     }
+  },
+  'statistics': {
+    'patrol': {
+      name: '行政区划',
+      patrolNum: '巡河次数（次）',
+      mileage: '巡河里程（km）',
+      duration: '巡河时长（h）',
+      problemNum: '巡河问题数（个）',
+      mileageDensity: '问题里程密度（个/km）',
+      durationDensity: '问题时长密度（个/h）',
+    },
+    'problem': {
+      name: '行政区划',
+      num: '问题数（个）',
+      complete: '办结问题数据（个）',
+      completeRate: '办结率（百分比）',
+    }
   }
 }

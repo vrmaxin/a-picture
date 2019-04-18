@@ -208,25 +208,11 @@
               </el-collapse-item>
             </el-collapse>
           </div>
-          <div v-if="moduleMap[3].actived">
-            <el-collapse v-model="jobActiveNames">
-              <el-collapse-item title="统计分析"
-                                name="1">
-                <el-checkbox :indeterminate="jobBasicIsIndeterminate"
-                             v-model="jobBasicAllSelected"
-                             @change="handleJobBasicAllChange"
-                             size="small"
-                             border>全选</el-checkbox>
-                <el-checkbox-group v-model="jobBasicSelected"
-                                   @change="handleJobBasicChange"
-                                   size="small">
-                  <el-checkbox v-for="(item,index) in jobBasicOptions"
-                               :label="item.value"
-                               :key="index"
-                               border>{{item.label}}</el-checkbox>
-                </el-checkbox-group>
-              </el-collapse-item>
-            </el-collapse>
+          <div v-show="moduleMap[3].actived">
+            <Statistics :tMap="tMap"
+                        @search="searchCallback"
+                        @setStatisticsOption="setStatisticsOption"
+                        :statisticsOption="statisticsOption"></Statistics>
           </div>
         </el-col>
       </el-row>
@@ -304,15 +290,21 @@
 import job from '@/api/job.js'
 import { TMap } from '@/utils/TMap.js'
 import Monitor from './lib/Monitor'
+import Statistics from './lib/Statistics'
 export default {
   name: 'Apic',
   components: {
-    Monitor
+    Monitor, Statistics
   },
   watch: {
   },
   data () {
     return {
+      statisticsOption: {
+        lng: '',
+        lat: '',
+        zoom: 9
+      },
 
       closeIcon: require('@/assets/global/close.png'),
       hideLeftPanel: false,
@@ -710,6 +702,20 @@ export default {
     this.initMap()
   },
   methods: {
+    setStatisticsOption (lng, lat) {
+      this.statisticsOption.lng = lng
+      this.statisticsOption.lat = lat
+    },
+    searchCallback (result) {
+      if (result.getStatus() == 100) {
+        var data = result.getData();
+        this.showMsg(data);
+      }
+      else {
+        result.getMsg();
+      }
+    },
+
     handleResetMap () {
       this.tMap.reset()
     },
@@ -783,6 +789,20 @@ export default {
 
       // 如果存在已有的覆盖物，则加载出原有的覆盖物
       var name = this.moduleMap[index].name
+
+      if (name === 'statistics') {
+        this.tMap.map.disableDrag()
+        this.tMap.map.disableScrollWheelZoom()
+        this.tMap.map.disableDoubleClickZoom()
+        
+        if (this.statisticsOption.lng && this.statisticsOption.lat) {
+          this.tMap.centerAndZoom(this.statisticsOption.lng, this.statisticsOption.lat, this.statisticsOption.zoom)
+        }
+      } else {
+        this.tMap.map.enableDrag()
+        this.tMap.map.enableScrollWheelZoom()
+        this.tMap.map.enableDoubleClickZoom()
+      }
 
       // 重新设置顶级模块名，用于标注点点击弹窗正确获取映射的中文属性名称
       this.tMap.topModuleType = name
@@ -1352,6 +1372,18 @@ export default {
         return 'addPolygon'
       } else if (type === '2' || type === '4') {
         return 'addPolyline'
+      }
+    },
+
+    //获取行政区划信息回调函数
+    searchResult (result) {
+      if (result.getStatus() == 100) {
+        var data = result.getData();
+        showMsg(data);
+        document.getElementById("administrativeMsg").innerHTML = html;
+      }
+      else {
+        result.getMsg();
       }
     }
   }

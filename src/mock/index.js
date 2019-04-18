@@ -35,7 +35,8 @@ Mock.mock(/\/monitor\/video\/list/, 'post', monitorAPI.getVideoList)
 // 搜索相关
 Mock.mock(/\/special\/user/, 'get', specialAPI.getList)
 
-// 账单相关
-Mock.mock(/\/statistics\/list/, 'get', statisticsAPI.getList)
+// 统计分析
+Mock.mock(/\/statistics\/patrol\/list/, 'post', statisticsAPI.getPatrolList)
+Mock.mock(/\/statistics\/problem\/list/, 'post', statisticsAPI.getProblemList)
 
 export default Mock
