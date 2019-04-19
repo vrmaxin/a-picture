@@ -21,6 +21,11 @@ Vue.prototype.$echarts = echarts
 
 Vue.config.productionTip = false
 
+// 引入VueKonva
+import VueKonva from 'vue-konva'
+Vue.use(VueKonva)
+
+
 new Vue({
   render: h => h(App),
 }).$mount('#app')

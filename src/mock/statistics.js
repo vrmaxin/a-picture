@@ -11,6 +11,7 @@ var patrolData = [{
     problemNum: '3274',
     mileageDensity: '115',
     durationDensity: '8',
+    widthLableAndCharts:'1',
     type: '1',
   },
   {
@@ -23,6 +24,7 @@ var patrolData = [{
     problemNum: '3274',
     mileageDensity: '115',
     durationDensity: '8',
+    widthLableAndCharts:'1',
     type: '1'
   },
   {
@@ -35,6 +37,7 @@ var patrolData = [{
     problemNum: '3274',
     mileageDensity: '115',
     durationDensity: '8',
+    widthLableAndCharts:'1',
     type: '1'
   },
   {
@@ -47,6 +50,7 @@ var patrolData = [{
     problemNum: '3274',
     mileageDensity: '115',
     durationDensity: '8',
+    widthLableAndCharts:'1',
     type: '1'
   }, {
     id: "5",
@@ -58,6 +62,7 @@ var patrolData = [{
     problemNum: '3274',
     mileageDensity: '115',
     durationDensity: '8',
+    widthLableAndCharts:'1',
     type: '1'
   }
 ]

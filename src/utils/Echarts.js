@@ -1,28 +1,57 @@
 class ECharts {
   // 构造
-  constructor(el) {
-    this.chart = this.$echarts.init(document.getElementById(el))
+  constructor(el, $echarts) {
+    this.chart = $echarts.init(document.getElementById(el))
   }
 
-  init(option) {
+  initChart(option) {
     // 绘制图表
     var distOption = {
-      title: {
-        text: '在Vue中使用echarts'
+      tooltip: {
+        trigger: 'item',
+        formatter: "{a} <br/>{b} : {c} ({d}%)",
       },
-      tooltip: {},
-      xAxis: {
-        data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]
-      },
-      yAxis: {},
       series: [{
         name: '销量',
-        type: 'bar',
-        data: [5, 20, 36, 10, 10, 20]
+        type: 'pie',
+        label: {
+          normal: {
+            formatter: "{c}",
+            position: 'inside'
+          }
+        },
+        data: [{
+            name: '巡河次数（次）',
+            value: '5'
+          },
+          {
+            name: '巡河里程（km）',
+            value: '5'
+          },
+          {
+            name: '巡河时长（h）',
+            value: '5'
+          },
+          {
+            name: '巡河问题数（个）',
+            value: '5'
+          },
+          {
+            name: '巡问题里程密度（个河次数（次）',
+            value: '5'
+          },
+          {
+            name: '问题时长密度（个）',
+            value: '5'
+          }
+        ]
       }]
     }
-    distOption = Object.assign(option, distOption)
-
+    var srcOption = {}
+    if (option) {
+      srcOption = Object.assign(option, srcOption)
+    }
+    distOption = Object.assign(srcOption, distOption)
     this.chart.setOption(distOption);
   }
 }

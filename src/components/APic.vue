@@ -1,7 +1,33 @@
 <template>
   <div class="a-pic">
 
-    <div id="chart"></div>
+    <!-- <div id="chart"></div> -->
+    <div v-if="statisticsPatrolSelectedStatus">
+      <VueKonvaDemo name="龙门县"
+                    class="konva-item konva-item-1"></VueKonvaDemo>
+      <VueKonvaDemo name="博罗县"
+                    class="konva-item konva-item-2"></VueKonvaDemo>
+      <VueKonvaDemo name="惠城区"
+                    class="konva-item konva-item-3"></VueKonvaDemo>
+      <VueKonvaDemo name="惠阳区"
+                    class="konva-item konva-item-4"></VueKonvaDemo>
+      <VueKonvaDemo name="惠东县"
+                    class="konva-item konva-item-5"></VueKonvaDemo>
+    </div>
+
+    <!-- <div id="chart"></div> -->
+    <div v-if="statisticsProblemSelectedStatus">
+      <VueKonvaDemo name="龙门县"
+                    class="konva-item konva-item-1"></VueKonvaDemo>
+      <VueKonvaDemo name="博罗县"
+                    class="konva-item konva-item-2"></VueKonvaDemo>
+      <VueKonvaDemo name="惠城区"
+                    class="konva-item konva-item-3"></VueKonvaDemo>
+      <VueKonvaDemo name="惠阳区"
+                    class="konva-item konva-item-4"></VueKonvaDemo>
+      <VueKonvaDemo name="惠东县"
+                    class="konva-item konva-item-5"></VueKonvaDemo>
+    </div>
 
     <img class="map-reset"
          :src="resetMap.icon"
@@ -217,10 +243,12 @@
             </el-collapse>
           </div>
           <div v-show="moduleMap[3].actived">
-            <Statistics :tMap="tMap"
+            <Statistics ref="statistics"
+                        :tMap="tMap"
                         @search="searchCallback"
                         @setStatisticsOption="setStatisticsOption"
-                        :statisticsOption="statisticsOption"></Statistics>
+                        :statisticsOption="statisticsOption"
+                        @changeStatus="changeStatisticsStatus"></Statistics>
           </div>
         </el-col>
       </el-row>
@@ -300,16 +328,19 @@ import { TMap } from '@/utils/TMap.js'
 import { ECharts } from '@/utils/ECharts.js'
 import Monitor from './lib/Monitor'
 import Statistics from './lib/Statistics'
-import { debug } from 'util';
+import VueKonvaDemo from './lib/VueKonvaDemo'
 export default {
   name: 'Apic',
   components: {
-    Monitor, Statistics
+    Monitor, Statistics, VueKonvaDemo
   },
   watch: {
   },
   data () {
     return {
+      statisticsPatrolSelectedStatus: false,
+      statisticsProblemSelectedStatus:false,
+
       statisticsOption: {
         lng: '',
         lat: '',
@@ -712,13 +743,21 @@ export default {
     // 是否显示河流分级
     isRiver () {
       return this.jobBasicParam.types && this.jobBasicParam.types.indexOf('2') !== -1 ? true : false
-    },
+    }
   },
   mounted () {
     this.initMap()
     this.initCharts()
   },
   methods: {
+    changeStatisticsStatus (status, type) {
+      debugger
+      if(type==='patrol'){
+        this.statisticsPatrolSelectedStatus = status
+      }else if(type==='problem'){
+        this.statisticsProblemSelectedStatus = status
+      }
+    },
     setStatisticsOption (lng, lat) {
       this.statisticsOption.lng = lng
       this.statisticsOption.lat = lat
@@ -789,7 +828,8 @@ export default {
       this.tMap.addMapControl(['mapType', 'zoom', 'scale'])
     },
     initCharts () {
-      this.eCharts = new ECharts('chart')
+      // this.eCharts = new ECharts('chart', this.$echarts)
+      // this.eCharts.initChart()
     },
 
     // 模块标签改变事件
@@ -1422,6 +1462,38 @@ export default {
     width: 400px;
     height: 400px;
     z-index: 1001;
+  }
+  .konva-item {
+    position: absolute;
+    left: 400px;
+    top: 100px;
+    width: 400px;
+    height: 400px;
+    z-index: 1001;
+    transform-origin: center;
+    transform: scale(0.5);
+  }
+  .konva-item-1 {
+    left: 750px;
+    top: 150px;
+  }
+  .konva-item-2 {
+    left: 800px;
+    top: 300px;
+  }
+  .konva-item-3 {
+    left: 870px;
+    top: 370px;
+    transform: scale(0.4);
+  }
+  .konva-item-4 {
+    left: 880px;
+    top: 470px;
+    transform: scale(0.4);
+  }
+  .konva-item-5 {
+    left: 1000px;
+    top: 400px;
   }
   .map-reset {
     position: absolute;

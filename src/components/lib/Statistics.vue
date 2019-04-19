@@ -123,11 +123,21 @@ export default {
 
     // 水质监测选项改变事件
     handlestatisticsPatrol (val) {
-      this.statisticsProblemSelected = []
+      this.statisticsProblemSelected = [].concat()
       let checkedCount = val.length;
       this.statisticsPatrolAllSelected = checkedCount === this.statisticsPatrolOptions.length;
       this.statisticsPatrolIsIndeterminate = checkedCount > 0 && checkedCount < this.statisticsPatrolOptions.length;
       this.statisticsPatrolParam.types = val
+
+      debugger
+      var status = false
+      if (this.statisticsPatrolSelected.length) {
+        status = true
+      } else {
+        status = false
+      }
+      this.$emit('changeStatus', status, 'patrol')
+
       this.getPatrolList()
     },
 
@@ -147,11 +157,21 @@ export default {
 
     // 水质监测选项改变事件
     handlestatisticsProblem (val) {
-      this.statisticsPatrolSelected = []
+      this.statisticsPatrolSelected = [].concat()
       let checkedCount = val.length;
       this.statisticsProblemAllSelected = checkedCount === this.statisticsProblemOptions.length;
       this.statisticsProblemIsIndeterminate = checkedCount > 0 && checkedCount < this.statisticsProblemOptions.length;
       this.statisticsProblemParam.types = val
+
+      debugger
+      var status = false
+      if (this.statisticsProblemSelected.length) {
+        status = true
+      } else {
+        status = false
+      }
+      this.$emit('changeStatus', status, 'problem')
+
       this.getProblemList()
     },
 
@@ -364,7 +384,7 @@ export default {
             if (item.name === name) {
               itemData = Object.assign({}, item)
               polygon.addEventListener("contextmenu", function (e) {
-                that.tMap.polyClickHandle(e, itemData)
+                // that.tMap.polyClickHandle(e, itemData)
               });
 
               polygon.addEventListener('mouseover', function () {
@@ -377,7 +397,7 @@ export default {
               })
 
               polygon.addEventListener("click", function (e) {
-                alert("Asdads")
+                that.tMap.polyClickHandle(e, itemData)
               });
             }
           }

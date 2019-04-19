@@ -175,6 +175,21 @@ class TMap {
       // 暂时隐藏视频
       html += `<div><video style="width:300px;height:150px;" controls="controls" autoplay src=${videoPath}></video></div>`
       html += `<div style="text-align:right;overflow:hidden;"><div style="display: flex;align-items: center;float:right;"><img style="cursor:pointer;" title="videoPath" id="zoomBtn" src=${zoomImgPath}><img style="cursor:pointer;" title="videoPath" id="nailBtn" src=${nailImgPath}></div></div>`
+    } else if (data.widthLableAndCharts) {
+
+      this.currentMediaType = 'charts'
+      // 记录标注点的id，用于获取一周的数据，用于图形展示
+      this.dataForCharts = Object.assign({}, data)
+
+      for (var key in data) {
+        var val = data[key]
+        // 使用data的moduleType属性获取模块类型
+        var keyMap = getkeyMapByModuleType(this.topModuleType, data.moduleType)
+        if (keyMap && keyMap[key]) {
+          html += `<div><strong>${keyMap[key]}:</strong><span>${val}</span>&nbsp;&nbsp;&nbsp;&nbsp;<a title='${key}' class='viewBtn' href='javascript:void(0);'>查看</a></div>`
+        }
+      }
+
     } else {
 
       for (var key in data) {
@@ -236,16 +251,29 @@ class TMap {
       // 缩放按钮添加点击事件
       var zoomDom = document.getElementById('zoomBtn')
       if (zoomDom) {
-        zoomDom.addEventListener('click', function () {
+        zoomDom.addEventListener('click', function (e) {
           if (that.currentMediaType === 'video' && that.videoPath) {
             that.vm.zoomVideo(that.videoPath)
           } else if (that.currentMediaType === 'img' && that.imgPath) {
             that.vm.zoomImg(that.imgPath)
           } else if (that.currentMediaType === 'charts' && that.dataForCharts) {
-            that.vm.zoomCharts(that.dataForCharts)
+            that.vm.zoomCharts(that.dataForCharts, e)
           }
         })
       }
+
+      // // 缩放按钮添加点击事件
+      // var viewDoms = document.getElementsByClass('viewBtn')
+      // for (var i = 0; i < viewDoms.length; i++) {
+      //   var viewDom = viewDoms[i]
+      //   if (viewDom) {
+      //     viewDom.addEventListener('click', function (e) {
+      //       if (that.currentMediaType === 'charts' && that.dataForCharts) {
+      //         that.vm.zoomCharts(that.dataForCharts, e)
+      //       }
+      //     })
+      //   }
+      // }
     })
 
     return html
